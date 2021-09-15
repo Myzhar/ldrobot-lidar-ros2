@@ -89,13 +89,17 @@ set(LIDAR_SRC
 )
 
 # TODO add driver files
-#set(LIDAR_DRIVER_INC
-#    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/xxxxxxxxxx.hpp
-#)
+set(LIDAR_DRIVER_INC
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/cmd_interface_linux.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/lipkg.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/tofbf.hpp
+)
 
-#set(LIDAR_DRIVER_SRC
-#    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/xxxxxxxxxx.cpp
-#)
+set(LIDAR_DRIVER_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/cmd_interface_linux.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/lipkg.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/tofbf.cpp
+)
 
 ###############################################################################
 # Bin and Install
