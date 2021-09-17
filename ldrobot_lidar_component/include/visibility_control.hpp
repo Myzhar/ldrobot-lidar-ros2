@@ -22,8 +22,8 @@
  * SOFTWARE.
  ********************************************************************************/
 
-#ifndef LIDAR_COMPONENTS__VISIBILITY_CONTROL_H_
-#define LIDAR_COMPONENTS__VISIBILITY_CONTROL_H_
+#ifndef LDLIDAR_COMPONENTS__VISIBILITY_CONTROL_H_
+#define LDLIDAR_COMPONENTS__VISIBILITY_CONTROL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -35,34 +35,34 @@ extern "C"
 
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef __GNUC__
-    #define LIDAR_COMPONENTS_EXPORT __attribute__ ((dllexport))
-    #define LIDAR_COMPONENTS_IMPORT __attribute__ ((dllimport))
+    #define LDLIDAR_COMPONENTS_EXPORT __attribute__ ((dllexport))
+    #define LDLIDAR_COMPONENTS_IMPORT __attribute__ ((dllimport))
   #else
-    #define LIDAR_COMPONENTS_EXPORT __declspec(dllexport)
-    #define LIDAR_COMPONENTS_IMPORT __declspec(dllimport)
+    #define LDLIDAR_COMPONENTS_EXPORT __declspec(dllexport)
+    #define LDLIDAR_COMPONENTS_IMPORT __declspec(dllimport)
   #endif
-  #ifdef LIDAR_COMPONENTS_BUILDING_DLL
-    #define LIDAR_COMPONENTS_PUBLIC LIDAR_COMPONENTS_EXPORT
+  #ifdef LDLIDAR_COMPONENTS_BUILDING_DLL
+    #define LDLIDAR_COMPONENTS_PUBLIC LDLIDAR_COMPONENTS_EXPORT
   #else
-    #define LIDAR_COMPONENTS_PUBLIC LIDAR_COMPONENTS_IMPORT
+    #define LDLIDAR_COMPONENTS_PUBLIC LDLIDAR_COMPONENTS_IMPORT
   #endif
-  #define LIDAR_COMPONENTS_PUBLIC_TYPE LIDAR_COMPONENTS_PUBLIC
-  #define LIDAR_COMPONENTS_LOCAL
+  #define LDLIDAR_COMPONENTS_PUBLIC_TYPE LDLIDAR_COMPONENTS_PUBLIC
+  #define LDLIDAR_COMPONENTS_LOCAL
 #else
-  #define LIDAR_COMPONENTS_EXPORT __attribute__ ((visibility("default")))
-  #define LIDAR_COMPONENTS_IMPORT
+  #define LDLIDAR_COMPONENTS_EXPORT __attribute__ ((visibility("default")))
+  #define LDLIDAR_COMPONENTS_IMPORT
   #if __GNUC__ >= 4
-    #define LIDAR_COMPONENTS_PUBLIC __attribute__ ((visibility("default")))
-    #define LIDAR_COMPONENTS_LOCAL  __attribute__ ((visibility("hidden")))
+    #define LDLIDAR_COMPONENTS_PUBLIC __attribute__ ((visibility("default")))
+    #define LDLIDAR_COMPONENTS_LOCAL  __attribute__ ((visibility("hidden")))
   #else
-    #define LIDAR_COMPONENTS_PUBLIC
-    #define LIDAR_COMPONENTS_LOCAL
+    #define LDLIDAR_COMPONENTS_PUBLIC
+    #define LDLIDAR_COMPONENTS_LOCAL
   #endif
-  #define LIDAR_COMPONENTS_PUBLIC_TYPE
+  #define LDLIDAR_COMPONENTS_PUBLIC_TYPE
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LIDAR_COMPONENTS__VISIBILITY_CONTROL_H_
+#endif  // LDLIDAR_COMPONENTS__VISIBILITY_CONTROL_H_

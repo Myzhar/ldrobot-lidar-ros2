@@ -67,11 +67,29 @@ struct PointData
     }
 };
 
+class LdLidarParams
+{
+private:
+	/* data */
+public:
+	LdLidarParams(/* args */);
+	~LdLidarParams();
+};
+
+LdLidarParams::LdLidarParams(/* args */)
+{
+}
+
+LdLidarParams::~LdLidarParams()
+{
+}
+
+
 
 class LiPkg
 {
 public:
-	LiPkg();
+	LiPkg(LdLidarParams& params = LdLidarParams());
 	double GetSpeed(void);	/*Lidar spin speed (Hz)*/
 	uint16_t GetTimestamp(void) { return mTimestamp; }   /*time stamp of the packet */
 	bool IsPkgReady(void) { return mIsPkgReady; }/*a packet is ready */
@@ -82,6 +100,7 @@ public:
 	bool Parse(const uint8_t* data , long len);/*parse single packet*/
 	bool AssemblePacket();/*combine stantard data into data frames and calibrate*/
 	sensor_msgs::LaserScan GetLaserScan() {return output;}
+	
 
 private:
 	uint16_t mTimestamp;

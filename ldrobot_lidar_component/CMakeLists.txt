@@ -75,17 +75,17 @@ set(node_plugins "")
 ###############################################################################
 # SOURCES
 set(LIDAR_TOOLS
-    ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/lidar_tools.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tools/src/lidar_tools.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/ldlidar_tools.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/src/ldlidar_tools.cpp
 )
 
 set(LIDAR_INC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/visibility_control.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lidar_component/include/lidar_component.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include/ldlidar_component.hpp
 )
 
 set(LIDAR_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/lidar_component/src/lidar_component.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/src/ldlidar_component.cpp
 )
 
 # TODO add driver files
