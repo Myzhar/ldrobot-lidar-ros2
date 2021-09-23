@@ -6,9 +6,9 @@
         "limitSymbolsToIncludedHeaders": true
       },
       "includePath": [
-        "/home/myzhar/devel/ros2_ws/install/ldrobot_lidar_component/include/**",
+        "/home/myzhar/devel/ros2_ws/install/ldlidar_component/include/**",
         "/opt/ros/foxy/include/**",
-        "/home/myzhar/devel/ros2_ws/src/ldrobot-lidar-ros2/ldrobot_lidar_component/include/**",
+        "/home/myzhar/devel/ros2_ws/src/ldrobot-lidar-ros2/ldlidar_component/include/**",
         "/usr/include/**"
       ],
       "name": "ROS"

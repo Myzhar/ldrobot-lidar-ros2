@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ldrobot_lidar_component)
+project(ldlidar_component)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -34,14 +34,16 @@ if(CMAKE_BUILD_TYPE MATCHES Debug )
     message(" * Debug Mode")
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+
 #############################################
 # Dependencies
 
 set(DEPENDENCIES
     rclcpp_lifecycle
-    lifecycle_msgs
     rclcpp
     rclcpp_components
+    lifecycle_msgs
     std_msgs
     sensor_msgs
 )
@@ -54,41 +56,37 @@ find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+find_package(udev REQUIRED)
+
+# create ament index resource which references the libraries in the binary dir
+set(node_plugins "")
+
 ###############################################################################
 #Add all files in subdirectories of the project in
 # a dummy_target so qtcreator have access to all files
 FILE(GLOB_RECURSE all_files ${CMAKE_SOURCE_DIR}/*)
 add_custom_target(all_${PROJECT_NAME}_files SOURCES ${all_files})
 
-###############################################################################
-# INCLUDES and LIBS
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/driver/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lidar_component/include
-)
-
-# create ament index resource which references the libraries in the binary dir
-set(node_plugins "")
 
 ###############################################################################
 # SOURCES
-set(LIDAR_TOOLS
+set(TOOLS_INC
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/ldlidar_tools.hpp
+)
+
+set(TOOLS_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/src/ldlidar_tools.cpp
 )
 
-set(LIDAR_INC
+set(COMPONENT_INC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/visibility_control.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include/ldlidar_component.hpp
 )
 
-set(LIDAR_SRC
+set(COMPONENT_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/src/ldlidar_component.cpp
 )
 
-# TODO add driver files
 set(LIDAR_DRIVER_INC
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/cmd_interface_linux.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/lipkg.hpp
@@ -96,35 +94,45 @@ set(LIDAR_DRIVER_INC
 )
 
 set(LIDAR_DRIVER_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/cmd_interface_linux.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/lipkg.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/tofbf.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/cmd_interface_linux.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/lipkg.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/tofbf.cpp
 )
 
 ###############################################################################
 # Bin and Install
 
-add_library(ldrobot_lidar_component SHARED
-    ${LIDAR_TOOLS}
-    ${LIDAR_INC}
-    ${LIDAR_SRC}
+add_library(${PROJECT_NAME} SHARED    
+    ${TOOLS_INC}
+    ${TOOLS_SRC}
+    ${COMPONENT_INC}
+    ${COMPONENT_SRC}
     ${LIDAR_DRIVER_INC}
-    ${LIDAR_DRIVER_SRC}
+    ${LIDAR_DRIVER_SRC}    
 )
-target_compile_definitions(ldrobot_lidar_component
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include
+    ${UDEV_INCLUDE_DIRS}
+)
+target_compile_definitions(${PROJECT_NAME}
     PRIVATE "COMPOSITION_BUILDING_DLL"
 )
-target_link_libraries(ldrobot_lidar_component
+target_link_libraries(${PROJECT_NAME}
+    ${UDEV_LIBRARIES}
 )
-ament_target_dependencies(ldrobot_lidar_component
+ament_target_dependencies(${PROJECT_NAME}
     ${DEPENDENCIES}
 )
 
-rclcpp_components_register_nodes(ldrobot_lidar_component "ldrobot::LidarLifecycle")
-set(node_plugins "${node_plugins}ldrobot::LidarLifecycle;$<TARGET_FILE:ldrobot_lidar_component>\n")
+rclcpp_components_register_nodes(${PROJECT_NAME} "ldlidar::LdLidarComponent")
+set(node_plugins "${node_plugins}ldlidar::LdLidarComponent;$<TARGET_FILE:${PROJECT_NAME}>\n")
 
 # Install components
-install(TARGETS ldrobot_lidar_component
+install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -132,7 +140,7 @@ install(TARGETS ldrobot_lidar_component
 
 # Install header files
 install(DIRECTORY 
-    ${CMAKE_CURRENT_SOURCE_DIR}/lidar_component/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
@@ -151,6 +159,6 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(ldrobot_lidar_component)
+ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(${DEPENDENCIES})
 ament_package()

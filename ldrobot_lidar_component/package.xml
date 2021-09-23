@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ldrobot_lidar_component</name>
+  <name>ldlidar_component</name>
   <version>0.1.0</version>
   <description>Package containing driver for LDRobot 2D DToF lidars. Based on ROS2 lifecycle concepts.</description>
   

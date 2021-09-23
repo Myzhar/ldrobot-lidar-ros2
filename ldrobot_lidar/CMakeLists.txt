@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(ldrobot_lidar NONE)
+project(ldlidar NONE)
 
 find_package(ament_cmake REQUIRED)
 
