@@ -80,11 +80,11 @@ set(TOOLS_SRC
 
 set(COMPONENT_INC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/visibility_control.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include/ldlidar_component.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/component/include/ldlidar_component.hpp
 )
 
 set(COMPONENT_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/src/ldlidar_component.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/component/src/ldlidar_component.cpp
 )
 
 set(LIDAR_DRIVER_INC
@@ -115,7 +115,7 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/include
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/component/include
     ${UDEV_INCLUDE_DIRS}
 )
 target_compile_definitions(${PROJECT_NAME}
@@ -140,7 +140,7 @@ install(TARGETS ${PROJECT_NAME}
 
 # Install header files
 install(DIRECTORY 
-    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_component/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/component/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/include/

@@ -52,6 +52,8 @@ protected:
   template <typename T>
   void getParam(std::string paramName, T defValue, T &outVal, std::string log_info = std::string());
 
+  void readParameters();
+
 private:
   // ----> Parameters
   bool mDebugMode = true;
