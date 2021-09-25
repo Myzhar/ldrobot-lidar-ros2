@@ -44,6 +44,21 @@ LiPkg::LiPkg(const LdLidarParams& params)
 {
 }
 
+LiPkg& LiPkg::operator=(const LiPkg& lipkg)
+{
+  mTimestamp = lipkg.mTimestamp;
+  mSpeed = lipkg.mSpeed;
+  mDataTmp = lipkg.mDataTmp;
+  mErrorTimes = lipkg.mErrorTimes;
+  mOnePkg = lipkg.mOnePkg;
+  mFrameTmp = lipkg.mFrameTmp;
+  mIsPkgReady = lipkg.mIsPkgReady;
+  mFrameReady = lipkg.mFrameReady;
+  output = lipkg.output;
+
+  return *this;
+}
+
 double LiPkg::GetSpeed(void)
 {
   return mSpeed;

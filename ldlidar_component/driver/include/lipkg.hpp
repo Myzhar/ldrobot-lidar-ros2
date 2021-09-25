@@ -54,19 +54,19 @@ struct PointData
   double y;
   PointData(float angle, uint16_t distance, uint8_t confidence, double x = 0, double y = 0)
   {
-	this->angle = angle;
-	this->distance = distance;
-	this->confidence = confidence;
-	this->x = x;
-	this->y = y;
+    this->angle = angle;
+    this->distance = distance;
+    this->confidence = confidence;
+    this->x = x;
+    this->y = y;
   }
   PointData()
   {
   }
   friend std::ostream& operator<<(std::ostream& os, const PointData& data)
   {
-	os << data.angle << " " << data.distance << " " << (int)data.confidence << " " << data.x << " " << data.y;
-	return os;
+    os << data.angle << " " << data.distance << " " << (int)data.confidence << " " << data.x << " " << data.y;
+    return os;
   }
 };
 
@@ -83,34 +83,39 @@ class LiPkg
 {
 public:
   LiPkg(const LdLidarParams& params = LdLidarParams());
+  LiPkg &operator=(const LiPkg &lipkg);
+
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)
   {
-	return mTimestamp;
+    return mTimestamp;
   } /*time stamp of the packet */
   bool IsPkgReady(void)
   {
-	return mIsPkgReady;
+    return mIsPkgReady;
   } /*a packet is ready */
   bool IsFrameReady(void)
   {
-	return mFrameReady;
+    return mFrameReady;
   } /*Lidar data frame is ready*/
   void ResetFrameReady(void)
   {
-	mFrameReady = false;
+    mFrameReady = false;
   }
   long GetErrorTimes(void)
   {
-	return mErrorTimes;
+    return mErrorTimes;
   } /*the number of errors in parser process of lidar data frame*/
   const std::array<PointData, POINT_PER_PACK>& GetPkgData(void); /*original data package*/
-  bool Parse(const uint8_t* data, long len);					 /*parse single packet*/
+  bool Parse(const uint8_t* data, long len);                     /*parse single packet*/
   bool AssemblePacket(); /*combine stantard data into data frames and calibrate*/
   sensor_msgs::msg::LaserScan GetLaserScan()
   {
-	return output;
+    return output;
   }
+
+protected:
+  void ToLaserscan(std::vector<PointData> src);
 
 private:
   uint16_t mTimestamp;
@@ -122,7 +127,6 @@ private:
   bool mIsPkgReady;
   bool mFrameReady;
   sensor_msgs::msg::LaserScan output;
-  void ToLaserscan(std::vector<PointData> src);
 };
 #endif
 /********************* (C) COPYRIGHT LD Robot *******END OF FILE ********/
