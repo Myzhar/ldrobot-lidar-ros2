@@ -1,22 +1,19 @@
 /**
  * @file         lipkg.cpp
  * @author       LD Robot
- * @version      V02
+ * @version      V01
  * @brief
  * @note
  * @attention    COPYRIGHT LDROBOT
- * @note Modified by Myzhar@2021
  **/
 
 #include <math.h>
 
 #include <algorithm>
 
-#include "lipkg.hpp"
-#include "tofbf.hpp"
+#include "lipkg.h"
+#include "tofbf.h"
 
-namespace ldlidar
-{
 static const uint8_t CrcTable[256] = {
   0x00, 0x4d, 0x9a, 0xd7, 0x79, 0x34, 0xe3, 0xae, 0xf2, 0xbf, 0x68, 0x25, 0x8b, 0xc6, 0x11, 0x5c, 0xa9, 0xe4, 0x33,
   0x7e, 0xd0, 0x9d, 0x4a, 0x07, 0x5b, 0x16, 0xc1, 0x8c, 0x22, 0x6f, 0xb8, 0xf5, 0x1f, 0x52, 0x85, 0xc8, 0x66, 0x2b,
@@ -39,16 +36,16 @@ LiPkg::LiPkg(UNIT unit, ROTATION rotVerse)
 {
   switch (unit)
   {
-	case UNIT::MILLIMETER:
+	case MILLIMETER:
 	  mUnitScale = 1.0;
 	  break;
 
-	case UNIT::CENTIMETER:
+	case CENTIMETER:
 	  mUnitScale = 10.;
 	  break;
 
 	default:
-	case UNIT::METER:
+	case METER:
 	  mUnitScale = 1e-3;
 	  break;
   }
@@ -223,25 +220,25 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
   /*Adjust the parameters according to the demand*/
   angle_min = 0;
   angle_max = 3.14159 * 2;
-  range_min = 0.03;
-  range_max = 15.0;
+  range_min = 0.5;
+  range_max = 15000;
   /*Angle resolution, the smaller the resolution, the smaller the error after conversion*/
   angle_increment = ANGLE_TO_RADIAN(mSpeed / 4500);
   /*Calculate the number of scanning points*/
   unsigned int beam_size = ceil((angle_max - angle_min) / angle_increment);
-  // output.header.stamp = get_clock()->now(); TODO set correct timestamp
-  mOutScan.header.frame_id = "lidar_frame"; // Add parameter for lidar frame
-  mOutScan.angle_min = angle_min;
-  mOutScan.angle_max = angle_max;
-  mOutScan.range_min = range_min;
-  mOutScan.range_max = range_max;
-  mOutScan.angle_increment = angle_increment;
-  mOutScan.time_increment = 0.0;
-  mOutScan.scan_time = 0.0;
+  output.header.stamp = ros::Time::now();
+  output.header.frame_id = "lidar_frame";
+  output.angle_min = angle_min;
+  output.angle_max = angle_max;
+  output.range_min = range_min;
+  output.range_max = range_max;
+  output.angle_increment = angle_increment;
+  output.time_increment = 0.0;
+  output.scan_time = 0.0;
 
   /*First fill all the data with Nan*/
-  mOutScan.ranges.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
-  mOutScan.intensities.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
+  output.ranges.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
+  output.intensities.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
 
   for (auto point : src)
   {
@@ -250,35 +247,34 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
 	float angle;
 	switch (mRotVerse)
 	{
-	  case ROTATION::CLOCKWISE:
+	  case CLOCKWISE:
 		angle = ANGLE_TO_RADIAN(point.angle);
 		break;
 
 	  default:
-	  case ROTATION::COUNTERCLOCKWISE:
+	  case COUNTERCLOCKWISE:
 		angle = ANGLE_TO_RADIAN(360. - point.angle);
 		break;
 	}
 
-	int index = (int)((angle - mOutScan.angle_min) / mOutScan.angle_increment);
+	int index = (int)((angle - output.angle_min) / output.angle_increment);
 	if (index >= 0 && index < beam_size)
 	{
 	  /*If the current content is Nan, it is assigned directly*/
-	  if (std::isnan(mOutScan.ranges[index]))
+	  if (std::isnan(output.ranges[index]))
 	  {
-		mOutScan.ranges[index] = range;
+		output.ranges[index] = range;
 	  }
 	  else
 	  { /*Otherwise, only when the distance is less than the current value, it can be re assigned*/
-		if (range < mOutScan.ranges[index])
+		if (range < output.ranges[index])
 		{
-		  mOutScan.ranges[index] = range;
+		  output.ranges[index] = range;
 		}
 	  }
-	  mOutScan.intensities[index] = point.confidence;
+	  output.intensities[index] = point.confidence;
 	}
   }
 }
 
-}  // namespace ldlidar
 /********************* (C) COPYRIGHT LD Robot *******END OF FILE ********/

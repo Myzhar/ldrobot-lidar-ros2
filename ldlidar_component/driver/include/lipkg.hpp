@@ -1,7 +1,7 @@
 /**
 * @file         lipkg.h
 * @author       LD Robot
-* @version      V01
+* @version      V02
 
 * @brief
 * @note
@@ -20,6 +20,8 @@
 
 #define ANGLE_TO_RADIAN(angle) ((angle)*3141.59 / 180000)
 
+namespace ldlidar
+{
 enum
 {
   PKG_HEADER = 0x54,
@@ -70,21 +72,32 @@ struct PointData
   }
 };
 
-class LdLidarParams
+/**
+  \enum UNIT
+  \brief Lists available unit for measures.
+   */
+enum class UNIT
 {
-private:
-  /* data */
-public:
-  LdLidarParams(/* args */);
-  ~LdLidarParams();
+  MILLIMETER, /**< International System, 1/1000 METER. */
+  CENTIMETER, /**< International System, 1/100 METER. */
+  METER       /**< International System, 1 METER [ROS standard]*/
+};
+
+/**
+  \enum ROTATION
+  \brief Lists available rotation verses
+   */
+enum class ROTATION
+{
+  CLOCKWISE,       /**< Right thumb looking down  */
+  COUNTERCLOCKWISE /**< Right thumb looking up [ROS standard]*/
 };
 
 class LiPkg
 {
 public:
-  LiPkg(const LdLidarParams& params = LdLidarParams());
-  LiPkg &operator=(const LiPkg &lipkg);
-
+public:
+  LiPkg(UNIT unit = UNIT::METER, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE);
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)
   {
@@ -111,7 +124,7 @@ public:
   bool AssemblePacket(); /*combine stantard data into data frames and calibrate*/
   sensor_msgs::msg::LaserScan GetLaserScan()
   {
-    return output;
+    return mOutScan;
   }
 
 protected:
@@ -126,7 +139,13 @@ private:
   std::vector<PointData> mFrameTmp;
   bool mIsPkgReady;
   bool mFrameReady;
-  sensor_msgs::msg::LaserScan output;
+  sensor_msgs::msg::LaserScan mOutScan;
+
+  // ----> Parameters
+  double mUnitScale = 1e-3;
+  ROTATION mRotVerse = ROTATION::COUNTERCLOCKWISE;
+  // <---- Parameters
 };
+}  // namespace ldlidar
 #endif
 /********************* (C) COPYRIGHT LD Robot *******END OF FILE ********/

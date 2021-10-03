@@ -60,6 +60,7 @@ protected:
   void getParameters();
   void getDebugParams();
   void getCommParams();
+  void getLaserParams();
   // <---- Node Parameters
 
   bool initLidar();
@@ -71,6 +72,7 @@ private:
   // ----> Parameters
   bool mDebugMode = true;
   bool mUseDirectSerial = false;  // Set to true if using a direct uart connection
+  std::string mSerialPort; // Serial port to use when @ref mUseDirectSerial is true
   // <---- Parameters
 
   // Publisher

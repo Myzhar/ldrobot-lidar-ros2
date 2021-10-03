@@ -65,7 +65,13 @@ void LdLidarComponent::getCommParams()
   // ----> Communication
   getParam("comm.direct_serial", mUseDirectSerial, mUseDirectSerial);
   RCLCPP_INFO_STREAM(get_logger(), " * Direct Serial comm: " << (mUseDirectSerial ? "TRUE" : "FALSE"));
+
+  getParam("comm.serial_port", mUseDirectSerial, mUseDirectSerial);
   // <---- Communication
+}
+
+void LdLidarComponent::getLaserParams()
+{
 }
 
 template <typename T>
@@ -109,7 +115,7 @@ LNI::CallbackReturn LdLidarComponent::on_configure(const lc::State& prev_state)
   // ----> Connect to Lidar
   if (!initLidar())
   {
-    return LNI::CallbackReturn::ERROR; // Transition to Finalized state
+    return LNI::CallbackReturn::ERROR;  // Transition to Finalized state
     // Note: we could use FAILURE instead of ERROR to remain in unconfigured state and try again to connect
   }
   // <---- Connect to Lidar
@@ -202,6 +208,11 @@ bool LdLidarComponent::initLidar()
     return false;
   }
 
+  if (mLidarComm->Open(mSerialPort))
+  {
+    RCLCPP_INFO_STREAM(get_logger(), "LDLidar connection successful");
+  }
+
   return true;
 }
 
@@ -213,7 +224,6 @@ bool LdLidarComponent::initLidarComm()
     mLidarComm = std::make_unique<CmdInterfaceLinux>();
 
     std::vector<std::pair<std::string, std::string>> device_list;
-    std::string port_name;
 
     mLidarComm->GetCmdDevices(device_list);
     for (auto n : device_list)
@@ -221,17 +231,21 @@ bool LdLidarComponent::initLidarComm()
       RCLCPP_DEBUG_STREAM(get_logger(), "Device found: " << n.first << "    " << n.second);
       if (strstr(n.second.c_str(), "CP2102"))
       {
-        port_name = n.first;
+        mSerialPort = n.first;
       }
     }
 
-    if (port_name.empty())
+    if (mSerialPort.empty())
     {
       RCLCPP_ERROR(get_logger(), "Can't find CP2102 USB<->UART converter.");
       return false;
     }
 
     RCLCPP_INFO(get_logger(), "Found CP2102 USB<->UART converter. Trying to connect to lidar device...");
+  }
+  else
+  {
+    // TODO test direct serial port connection
   }
 
   return true;
