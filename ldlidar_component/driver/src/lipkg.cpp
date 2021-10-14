@@ -218,6 +218,7 @@ const std::array<PointData, POINT_PER_PACK>& LiPkg::GetPkgData(void)
 
 void LiPkg::ToLaserscan(std::vector<PointData> src)
 {
+  mOutScan = std::make_unique<sensor_msgs::msg::LaserScan>();
   float angle_min, angle_max, range_min, range_max, angle_increment;
 
   /*Adjust the parameters according to the demand*/
@@ -230,18 +231,18 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
   /*Calculate the number of scanning points*/
   unsigned int beam_size = ceil((angle_max - angle_min) / angle_increment);
   // output.header.stamp = get_clock()->now(); TODO set correct timestamp
-  mOutScan.header.frame_id = "lidar_frame"; // Add parameter for lidar frame
-  mOutScan.angle_min = angle_min;
-  mOutScan.angle_max = angle_max;
-  mOutScan.range_min = range_min;
-  mOutScan.range_max = range_max;
-  mOutScan.angle_increment = angle_increment;
-  mOutScan.time_increment = 0.0;
-  mOutScan.scan_time = 0.0;
+  mOutScan->header.frame_id = "lidar_frame";	 // Add parameter for lidar frame
+  mOutScan->angle_min = angle_min;
+  mOutScan->angle_max = angle_max;
+  mOutScan->range_min = range_min;
+  mOutScan->range_max = range_max;
+  mOutScan->angle_increment = angle_increment;
+  mOutScan->time_increment = 0.0;
+  mOutScan->scan_time = 0.0;
 
   /*First fill all the data with Nan*/
-  mOutScan.ranges.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
-  mOutScan.intensities.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
+  mOutScan->ranges.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
+  mOutScan->intensities.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
 
   for (auto point : src)
   {
@@ -260,22 +261,22 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
 		break;
 	}
 
-	int index = (int)((angle - mOutScan.angle_min) / mOutScan.angle_increment);
+	int index = (int)((angle - mOutScan->angle_min) / mOutScan->angle_increment);
 	if (index >= 0 && index < beam_size)
 	{
 	  /*If the current content is Nan, it is assigned directly*/
-	  if (std::isnan(mOutScan.ranges[index]))
+	  if (std::isnan(mOutScan->ranges[index]))
 	  {
-		mOutScan.ranges[index] = range;
+		mOutScan->ranges[index] = range;
 	  }
 	  else
 	  { /*Otherwise, only when the distance is less than the current value, it can be re assigned*/
-		if (range < mOutScan.ranges[index])
+		if (range < mOutScan->ranges[index])
 		{
-		  mOutScan.ranges[index] = range;
+		  mOutScan->ranges[index] = range;
 		}
 	  }
-	  mOutScan.intensities[index] = point.confidence;
+	  mOutScan->intensities[index] = point.confidence;
 	}
   }
 }

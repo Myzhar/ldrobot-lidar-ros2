@@ -122,9 +122,9 @@ public:
   const std::array<PointData, POINT_PER_PACK>& GetPkgData(void); /*original data package*/
   bool Parse(const uint8_t* data, long len);                     /*parse single packet*/
   bool AssemblePacket(); /*combine stantard data into data frames and calibrate*/
-  sensor_msgs::msg::LaserScan GetLaserScan()
+  std::unique_ptr<sensor_msgs::msg::LaserScan> GetLaserScan()
   {
-    return mOutScan;
+    return std::move(mOutScan);
   }
 
 protected:
@@ -139,7 +139,7 @@ private:
   std::vector<PointData> mFrameTmp;
   bool mIsPkgReady;
   bool mFrameReady;
-  sensor_msgs::msg::LaserScan mOutScan;
+  std::unique_ptr<sensor_msgs::msg::LaserScan> mOutScan;
 
   // ----> Parameters
   double mUnitScale = 1e-3;

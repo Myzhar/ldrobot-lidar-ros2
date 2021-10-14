@@ -65,6 +65,9 @@ protected:
 
   bool initLidar();
   bool initLidarComm();
+  void startLidarThread();
+  void stopLidarThread();
+  void lidarThreadFunc();
 
   void publishLaserScan();
 
@@ -72,7 +75,7 @@ private:
   // ----> Parameters
   bool mDebugMode = true;
   bool mUseDirectSerial = false;  // Set to true if using a direct uart connection
-  std::string mSerialPort; // Serial port to use when @ref mUseDirectSerial is true
+  std::string mSerialPort;        // Serial port to use when @ref mUseDirectSerial is true
   // <---- Parameters
 
   // Publisher
@@ -88,6 +91,10 @@ private:
 
   // Lidar communication
   std::unique_ptr<CmdInterfaceLinux> mLidarComm;
+
+  // Lidar Thread
+  std::thread mLidarThread;
+  bool mThreadStop = false;
 };
 
 }  // namespace ldlidar

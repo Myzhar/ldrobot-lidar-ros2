@@ -130,6 +130,9 @@ LNI::CallbackReturn LdLidarComponent::on_activate(const lc::State& prev_state)
   RCLCPP_DEBUG_STREAM(get_logger(), "on_activate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                                     << "] -> Active");
 
+  // Start lidar thread
+  startLidarThread();
+
   RCLCPP_INFO(get_logger(), "State: 'active [3]'. Use lifecycle commands to deactivate [4] or shutdown [7]");
   return LNI::CallbackReturn::SUCCESS;
 }
@@ -138,6 +141,9 @@ LNI::CallbackReturn LdLidarComponent::on_deactivate(const lc::State& prev_state)
 {
   RCLCPP_DEBUG_STREAM(get_logger(), "on_deactivate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                                       << "] -> Inactive");
+
+  // Stop Lidar THread
+  stopLidarThread();
 
   RCLCPP_INFO(get_logger(), "State: 'inactive [2]'. Use lifecycle commands to activate [3], cleanup [2] or shutdown "
                             "[6]");
@@ -178,7 +184,6 @@ LNI::CallbackReturn LdLidarComponent::on_error(const lc::State& prev_state)
 void LdLidarComponent::publishLaserScan()
 {
   static size_t count = 0;
-  auto msg = std::make_unique<sensor_msgs::msg::LaserScan>();
 
   // Print the current state for demo purposes
   if (!mScanPub->is_activated())
@@ -186,11 +191,14 @@ void LdLidarComponent::publishLaserScan()
     auto& clk = *this->get_clock();
     RCLCPP_INFO_THROTTLE(get_logger(), clk, 5000,
                          "Lifecycle publisher is currently inactive. Messages are not published.");
+    return;
   }
 
   int nSub = count_subscribers(mScanTopic);
   if (nSub > 0)
   {
+    auto msg = mLidar->GetLaserScan();
+    mLidar->ResetFrameReady();
     // We independently from the current state call publish on the lifecycle
     // publisher.
     // Only if the publisher is in an active state, the message transfer is
@@ -208,10 +216,20 @@ bool LdLidarComponent::initLidar()
     return false;
   }
 
+  // Set serial reading callback
+  mLidarComm->SetReadCallback([&lidar](const char* byte, size_t len) {
+    if (lidar->Parse((uint8_t*)byte, len))
+    {
+      mLidar->AssemblePacket();
+    }
+  });
+
   if (mLidarComm->Open(mSerialPort))
   {
     RCLCPP_INFO_STREAM(get_logger(), "LDLidar connection successful");
   }
+
+  // Create publisher and activate it
 
   return true;
 }
@@ -249,6 +267,61 @@ bool LdLidarComponent::initLidarComm()
   }
 
   return true;
+}
+
+void LdLidarComponent::startLidarThread()
+{
+  mLidarThread = std::thread(&LdLidarComponent::lidarThreadFunc, this);
+}
+
+void LdLidarComponent::stopLidarThread()
+{
+  if (!mThreadStop)
+  {
+    mThreadStop = true;
+    RCLCPP_DEBUG(get_logger(), "Stopping lidar thread...");
+    try
+    {
+      if (mLidarThread.joinable())
+      {
+        mLidarThread.join();
+      }
+    }
+    catch (std::system_error& e)
+    {
+      RCLCPP_WARN(get_logger(), "Lidar thread joining exception: %s", e.what());
+    }
+  }
+}
+
+void LdLidarComponent::lidarThreadFunc()
+{
+  RCLCPP_DEBUG(get_logger(), "Lidar thread started");
+
+  mThreadStop = false;
+  while (1)
+  {
+    // ----> Interruption check
+    if (!rclcpp::ok())
+    {
+      RCLCPP_DEBUG(get_logger(), "Ctrl+C received: stopping grab thread");
+      mThreadStop = true;
+    }
+
+    if (mThreadStop)
+    {
+      RCLCPP_DEBUG(get_logger(), "Lidar thread stopped");
+      break;
+    }
+    // <---- Interruption check
+
+    if (mLidar->IsFrameReady())
+    {
+      publishLaserScan();
+    }
+  }
+
+  RCLCPP_DEBUG(get_logger(), "Lidar thread finished");
 }
 
 }  // namespace ldlidar
