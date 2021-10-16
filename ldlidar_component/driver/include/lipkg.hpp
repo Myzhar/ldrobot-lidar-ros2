@@ -15,10 +15,11 @@
 
 #include <array>
 #include <iostream>
+#include <rclcpp/clock.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <vector>
 
-#define ANGLE_TO_RADIAN(angle) ((angle)*3141.59 / 180000)
+#define ANGLE_TO_RADIAN(angle) ((angle)*M_PI / 180.)
 
 namespace ldlidar
 {
@@ -97,7 +98,8 @@ class LiPkg
 {
 public:
 public:
-  LiPkg(UNIT unit = UNIT::METER, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE);
+  LiPkg(rclcpp::Clock::SharedPtr clock, UNIT unit = UNIT::METER, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE,
+        std::string lidarFrame = "lidar_link");
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)
   {
@@ -140,10 +142,12 @@ private:
   bool mIsPkgReady;
   bool mFrameReady;
   std::unique_ptr<sensor_msgs::msg::LaserScan> mOutScan;
+  rclcpp::Clock::SharedPtr mClock;
 
   // ----> Parameters
   double mUnitScale = 1e-3;
   ROTATION mRotVerse = ROTATION::COUNTERCLOCKWISE;
+  std::string mLidarFrame = "lidar_link";
   // <---- Parameters
 };
 }  // namespace ldlidar

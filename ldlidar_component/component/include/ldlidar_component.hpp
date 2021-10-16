@@ -68,6 +68,7 @@ protected:
   void startLidarThread();
   void stopLidarThread();
   void lidarThreadFunc();
+  void lidarReadCallback(const char* byte, size_t len);
 
   void publishLaserScan();
 

@@ -1,5 +1,7 @@
 #include "ldlidar_component.hpp"
 
+using namespace std::placeholders;
+
 namespace ldlidar
 {
 LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions& options)
@@ -129,6 +131,8 @@ LNI::CallbackReturn LdLidarComponent::on_activate(const lc::State& prev_state)
 {
   RCLCPP_DEBUG_STREAM(get_logger(), "on_activate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                                     << "] -> Active");
+  // Activate publisher
+  mScanPub->on_activate();
 
   // Start lidar thread
   startLidarThread();
@@ -141,6 +145,8 @@ LNI::CallbackReturn LdLidarComponent::on_deactivate(const lc::State& prev_state)
 {
   RCLCPP_DEBUG_STREAM(get_logger(), "on_deactivate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                                       << "] -> Inactive");
+  // Dectivate publisher
+  mScanPub->on_deactivate();
 
   // Stop Lidar THread
   stopLidarThread();
@@ -209,7 +215,7 @@ void LdLidarComponent::publishLaserScan()
 
 bool LdLidarComponent::initLidar()
 {
-  mLidar = std::make_unique<LiPkg>();
+  mLidar = std::make_unique<LiPkg>(get_clock());
 
   if (!initLidarComm())
   {
@@ -217,21 +223,22 @@ bool LdLidarComponent::initLidar()
   }
 
   // Set serial reading callback
-  mLidarComm->SetReadCallback([&lidar](const char* byte, size_t len) {
-    if (lidar->Parse((uint8_t*)byte, len))
-    {
-      mLidar->AssemblePacket();
-    }
-  });
+  mLidarComm->SetReadCallback(std::bind(&LdLidarComponent::lidarReadCallback, this, _1, _2));
 
   if (mLidarComm->Open(mSerialPort))
   {
     RCLCPP_INFO_STREAM(get_logger(), "LDLidar connection successful");
   }
 
-  // Create publisher and activate it
-
   return true;
+}
+
+void LdLidarComponent::lidarReadCallback(const char* byte, size_t len)
+{
+  if (mLidar->Parse((uint8_t*)byte, len))
+  {
+    mLidar->AssemblePacket();
+  }
 }
 
 bool LdLidarComponent::initLidarComm()

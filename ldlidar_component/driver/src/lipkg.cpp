@@ -34,8 +34,8 @@ static const uint8_t CrcTable[256] = {
   0x5a, 0x06, 0x4b, 0x9c, 0xd1, 0x7f, 0x32, 0xe5, 0xa8
 };
 
-LiPkg::LiPkg(UNIT unit, ROTATION rotVerse)
-  : mTimestamp(0), mSpeed(0), mErrorTimes(0), mFrameReady(false), mIsPkgReady(false), mRotVerse(rotVerse)
+LiPkg::LiPkg(rclcpp::Clock::SharedPtr clock, UNIT unit, ROTATION rotVerse, std::string lidarFrame)
+  : mTimestamp(0), mSpeed(0), mErrorTimes(0), mFrameReady(false), mIsPkgReady(false), mClock(clock), mRotVerse(rotVerse), mLidarFrame(lidarFrame)
 {
   switch (unit)
   {
@@ -230,8 +230,8 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
   angle_increment = ANGLE_TO_RADIAN(mSpeed / 4500);
   /*Calculate the number of scanning points*/
   unsigned int beam_size = ceil((angle_max - angle_min) / angle_increment);
-  // output.header.stamp = get_clock()->now(); TODO set correct timestamp
-  mOutScan->header.frame_id = "lidar_frame";	 // Add parameter for lidar frame
+  mOutScan->header.stamp = mClock->now();
+  mOutScan->header.frame_id = mLidarFrame;
   mOutScan->angle_min = angle_min;
   mOutScan->angle_max = angle_max;
   mOutScan->range_min = range_min;
