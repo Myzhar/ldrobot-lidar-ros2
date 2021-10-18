@@ -144,7 +144,7 @@ void LdLidarComponent::getLidarParams()
   getParam("lidar.qos_reliability", qos_reliability, qos_reliability);
   if (qos_reliability < 0 || qos_reliability >= static_cast<int>(RMW_QOS_POLICY_RELIABILITY_RELIABLE))
   {
-    RCLCPP_WARN_STREAM(get_logger(), "QoS History value not valid (" << qos_reliability << "). Using default value");
+    RCLCPP_WARN_STREAM(get_logger(), "QoS Reliability value not valid (" << qos_reliability << "). Using default value");
     mLidarQos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
   }
   else
