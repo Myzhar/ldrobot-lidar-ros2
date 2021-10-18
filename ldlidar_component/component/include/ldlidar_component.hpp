@@ -1,10 +1,6 @@
 #ifndef LDLIDAR_COMPONENT_HPP
 #define LDLIDAR_COMPONENT_HPP
 
-#include <rcutils/logging_macros.h>
-
-#include <sensor_msgs/msg/laser_scan.hpp>
-
 #include "cmd_interface_linux.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
 #include "lipkg.hpp"
@@ -12,6 +8,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
+#include "rcutils/logging_macros.h"
+#include "sensor_msgs/msg/laser_scan.hpp"
 #include "visibility_control.hpp"
 
 namespace lc = rclcpp_lifecycle;
@@ -60,7 +58,7 @@ protected:
   void getParameters();
   void getDebugParams();
   void getCommParams();
-  void getLaserParams();
+  void getLidarParams();
   // <---- Node Parameters
 
   bool initLidar();
@@ -77,6 +75,10 @@ private:
   bool mDebugMode = true;
   bool mUseDirectSerial = false;  // Set to true if using a direct uart connection
   std::string mSerialPort;        // Serial port to use when @ref mUseDirectSerial is true
+
+  UNITS mUnits = UNITS::METERS;
+  ROTATION mRotVerse = ROTATION::CLOCKWISE;
+  std::string mFrameId = "lidar_link";
   // <---- Parameters
 
   // Publisher

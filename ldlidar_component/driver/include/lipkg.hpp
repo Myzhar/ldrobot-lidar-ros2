@@ -74,14 +74,14 @@ struct PointData
 };
 
 /**
-  \enum UNIT
+  \enum UNITS
   \brief Lists available unit for measures.
    */
-enum class UNIT
+enum class UNITS
 {
-  MILLIMETER, /**< International System, 1/1000 METER. */
-  CENTIMETER, /**< International System, 1/100 METER. */
-  METER       /**< International System, 1 METER [ROS standard]*/
+  MILLIMETERS, /**< International System, 1/1000 m. */
+  CENTIMETERS, /**< International System, 1/100 m. */
+  METERS       /**< International System, 1 m [ROS standard]*/
 };
 
 /**
@@ -98,7 +98,7 @@ class LiPkg
 {
 public:
 public:
-  LiPkg(rclcpp::Clock::SharedPtr clock, UNIT unit = UNIT::METER, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE,
+  LiPkg(rclcpp::Clock::SharedPtr clock, UNITS unit = UNITS::METERS, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE,
         std::string lidarFrame = "lidar_link");
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)

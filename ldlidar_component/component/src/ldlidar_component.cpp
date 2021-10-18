@@ -1,4 +1,5 @@
 #include "ldlidar_component.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 
 using namespace std::placeholders;
 
@@ -29,6 +30,9 @@ void LdLidarComponent::getParameters()
 
   // COMMUNICATION parameters
   getCommParams();
+
+  // LIDAR parameters
+  getLidarParams();
 }
 
 void LdLidarComponent::getDebugParams()
@@ -41,7 +45,7 @@ void LdLidarComponent::getDebugParams()
 
     if (res != RCUTILS_RET_OK)
     {
-      RCLCPP_INFO(get_logger(), "Error setting DEBUG level fot logger");
+      RCLCPP_INFO(get_logger(), "Error setting DEBUG level for logger");
     }
     else
     {
@@ -64,21 +68,73 @@ void LdLidarComponent::getDebugParams()
 
 void LdLidarComponent::getCommParams()
 {
+  RCLCPP_INFO(get_logger(), "+++ COMMUNICATION PARAMETERS +++");
+
   // ----> Communication
   getParam("comm.direct_serial", mUseDirectSerial, mUseDirectSerial);
   RCLCPP_INFO_STREAM(get_logger(), " * Direct Serial comm: " << (mUseDirectSerial ? "TRUE" : "FALSE"));
 
-  getParam("comm.serial_port", mUseDirectSerial, mUseDirectSerial);
+  if (mUseDirectSerial)
+  {
+    getParam("comm.serial_port", mUseDirectSerial, mUseDirectSerial, "* Serial port: ");
+  }
   // <---- Communication
 }
 
-void LdLidarComponent::getLaserParams()
+void LdLidarComponent::getLidarParams()
 {
+  RCLCPP_INFO(get_logger(), "+++ LIDAR PARAMETERS +++");
+
+  // ----> Lidar config
+  getParam("lidar.frame_id", mFrameId, mFrameId, " * Lidar frame: ");
+  int rotVerse = static_cast<int>(mRotVerse);
+  getParam("lidar.rot_verse", rotVerse, rotVerse);
+  if (rotVerse < 0 || rotVerse > static_cast<int>(ROTATION::COUNTERCLOCKWISE))
+  {
+    RCLCPP_WARN_STREAM(get_logger(), "Rotation verse not valid (" << rotVerse << "). Using default value");
+    mRotVerse = ROTATION::COUNTERCLOCKWISE;
+  }
+  else
+  {
+    mRotVerse = static_cast<ROTATION>(rotVerse);
+  }
+  RCLCPP_INFO_STREAM(get_logger(), " * Rotation verse: " << ((mRotVerse == ROTATION::COUNTERCLOCKWISE) ? "COUNTERCLOCKW"
+                                                                                                         "ISE" :
+                                                                                                         "CLOCKWISE"));
+  int units = static_cast<int>(mUnits);
+  getParam("lidar.units", units, units);
+  if (units < 0 || units > static_cast<int>(UNITS::METERS))
+  {
+    RCLCPP_WARN_STREAM(get_logger(), "Units value not valid (" << units << "). Using default value");
+    mUnits = UNITS::METERS;
+  }
+  else
+  {
+    mUnits = static_cast<UNITS>(units);
+  }
+  switch (mUnits)
+  {
+    case UNITS::MILLIMETERS:
+      RCLCPP_INFO_STREAM(get_logger(), " * Measure units: MILLIMETERS");
+      break;
+
+    case UNITS::CENTIMETERS:
+      RCLCPP_INFO_STREAM(get_logger(), " * Measure units: CENTIMETERS");
+      break;
+
+    case UNITS::METERS:
+    default:
+      RCLCPP_INFO_STREAM(get_logger(), " * Measure units: METERS");
+      break;
+  }
+  // <---- Lidar config
 }
 
 template <typename T>
 void LdLidarComponent::getParam(std::string paramName, T defValue, T& outVal, std::string log_info)
 {
+  rcl_interfaces::msg::ParameterDescriptor descr;
+
   if (!get_parameter(paramName, outVal))
   {
     declare_parameter(paramName, rclcpp::ParameterValue(defValue));

@@ -34,21 +34,21 @@ static const uint8_t CrcTable[256] = {
   0x5a, 0x06, 0x4b, 0x9c, 0xd1, 0x7f, 0x32, 0xe5, 0xa8
 };
 
-LiPkg::LiPkg(rclcpp::Clock::SharedPtr clock, UNIT unit, ROTATION rotVerse, std::string lidarFrame)
+LiPkg::LiPkg(rclcpp::Clock::SharedPtr clock, UNITS unit, ROTATION rotVerse, std::string lidarFrame)
   : mTimestamp(0), mSpeed(0), mErrorTimes(0), mFrameReady(false), mIsPkgReady(false), mClock(clock), mRotVerse(rotVerse), mLidarFrame(lidarFrame)
 {
   switch (unit)
   {
-	case UNIT::MILLIMETER:
+	case UNITS::MILLIMETERS:
 	  mUnitScale = 1.0;
 	  break;
 
-	case UNIT::CENTIMETER:
+	case UNITS::CENTIMETERS:
 	  mUnitScale = 10.;
 	  break;
 
 	default:
-	case UNIT::METER:
+	case UNITS::METERS:
 	  mUnitScale = 1e-3;
 	  break;
   }
