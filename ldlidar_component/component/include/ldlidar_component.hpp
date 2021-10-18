@@ -89,6 +89,10 @@ private:
   std::string mScanTopic = "scan";
   // <---- Topics
 
+  // ----> QoS
+  rclcpp::QoS mLidarQos;
+  // <---- QoS
+
   // Lidar
   std::unique_ptr<LiPkg> mLidar;
 

@@ -35,22 +35,29 @@ static const uint8_t CrcTable[256] = {
 };
 
 LiPkg::LiPkg(rclcpp::Clock::SharedPtr clock, UNITS unit, ROTATION rotVerse, std::string lidarFrame)
-  : mTimestamp(0), mSpeed(0), mErrorTimes(0), mFrameReady(false), mIsPkgReady(false), mClock(clock), mRotVerse(rotVerse), mLidarFrame(lidarFrame)
+  : mTimestamp(0)
+  , mSpeed(0)
+  , mErrorTimes(0)
+  , mFrameReady(false)
+  , mIsPkgReady(false)
+  , mClock(clock)
+  , mRotVerse(rotVerse)
+  , mLidarFrame(lidarFrame)
 {
   switch (unit)
   {
-	case UNITS::MILLIMETERS:
-	  mUnitScale = 1.0;
-	  break;
+    case UNITS::MILLIMETERS:
+      mUnitScale = 1.0;
+      break;
 
-	case UNITS::CENTIMETERS:
-	  mUnitScale = 10.;
-	  break;
+    case UNITS::CENTIMETERS:
+      mUnitScale = 10.;
+      break;
 
-	default:
-	case UNITS::METERS:
-	  mUnitScale = 1e-3;
-	  break;
+    default:
+    case UNITS::METERS:
+      mUnitScale = 1e-3;
+      break;
   }
 }
 
@@ -63,111 +70,111 @@ bool LiPkg::Parse(const uint8_t* data, long len)
 {
   for (int i = 0; i < len; i++)
   {
-	mDataTmp.push_back(*(data + i));
+    mDataTmp.push_back(*(data + i));
   }
 
   if (mDataTmp.size() < sizeof(LiDARFrameTypeDef))
-	return false;
+    return false;
 
   if (mDataTmp.size() > sizeof(LiDARFrameTypeDef) * 100)
   {
-	mErrorTimes++;
-	mDataTmp.clear();
-	return false;
+    mErrorTimes++;
+    mDataTmp.clear();
+    return false;
   }
 
   uint16_t start = 0;
 
   while (start < mDataTmp.size() - 2)
   {
-	start = 0;
-	while (start < mDataTmp.size() - 2)
-	{
-	  if ((mDataTmp[start] == PKG_HEADER) && (mDataTmp[start + 1] == PKG_VER_LEN))
-	  {
-		break;
-	  }
+    start = 0;
+    while (start < mDataTmp.size() - 2)
+    {
+      if ((mDataTmp[start] == PKG_HEADER) && (mDataTmp[start + 1] == PKG_VER_LEN))
+      {
+        break;
+      }
 
-	  if ((mDataTmp[start] == PKG_HEADER) && (mDataTmp[start + 1] == (PKG_VER_LEN | (0x07 << 5))))
-	  {
-		break;
-	  }
-	  start++;
-	}
+      if ((mDataTmp[start] == PKG_HEADER) && (mDataTmp[start + 1] == (PKG_VER_LEN | (0x07 << 5))))
+      {
+        break;
+      }
+      start++;
+    }
 
-	if (start != 0)
-	{
-	  mErrorTimes++;
-	  for (int i = 0; i < start; i++)
-	  {
-		mDataTmp.erase(mDataTmp.begin());
-	  }
-	}
+    if (start != 0)
+    {
+      mErrorTimes++;
+      for (int i = 0; i < start; i++)
+      {
+        mDataTmp.erase(mDataTmp.begin());
+      }
+    }
 
-	if (mDataTmp.size() < sizeof(LiDARFrameTypeDef))
-	  return false;
+    if (mDataTmp.size() < sizeof(LiDARFrameTypeDef))
+      return false;
 
-	LiDARFrameTypeDef* pkg = (LiDARFrameTypeDef*)mDataTmp.data();
-	uint8_t crc = 0;
+    LiDARFrameTypeDef* pkg = (LiDARFrameTypeDef*)mDataTmp.data();
+    uint8_t crc = 0;
 
-	for (uint32_t i = 0; i < sizeof(LiDARFrameTypeDef) - 1; i++)
-	{
-	  crc = CrcTable[(crc ^ mDataTmp[i]) & 0xff];
-	}
+    for (uint32_t i = 0; i < sizeof(LiDARFrameTypeDef) - 1; i++)
+    {
+      crc = CrcTable[(crc ^ mDataTmp[i]) & 0xff];
+    }
 
-	if (crc == pkg->crc8)
-	{
-	  double diff = (pkg->end_angle / 100 - pkg->start_angle / 100 + 360) % 360;
-	  if (diff > (double)pkg->speed * POINT_PER_PACK / 4500 * 3 / 2)
-	  {
-		mErrorTimes++;
-	  }
-	  else
-	  {
-		mSpeed = pkg->speed;
-		mTimestamp = pkg->timestamp;
-		uint32_t diff = ((uint32_t)pkg->end_angle + 36000 - (uint32_t)pkg->start_angle) % 36000;
-		float step = diff / (POINT_PER_PACK - 1) / 100.0;
-		float start = (double)pkg->start_angle / 100.0;
-		float end = (double)(pkg->end_angle % 36000) / 100.0;
-		PointData data;
-		for (int i = 0; i < POINT_PER_PACK; i++)
-		{
-		  data.distance = pkg->point[i].distance;
-		  data.angle = start + i * step;
-		  if (data.angle >= 360.0)
-		  {
-			data.angle -= 360.0;
-		  }
-		  data.confidence = pkg->point[i].confidence;
-		  mOnePkg[i] = data;
-		  mFrameTmp.push_back(PointData(data.angle, data.distance, data.confidence));
-		}
-		// prevent angle invert
-		mOnePkg.back().angle = end;
+    if (crc == pkg->crc8)
+    {
+      double diff = (pkg->end_angle / 100 - pkg->start_angle / 100 + 360) % 360;
+      if (diff > (double)pkg->speed * POINT_PER_PACK / 4500 * 3 / 2)
+      {
+        mErrorTimes++;
+      }
+      else
+      {
+        mSpeed = pkg->speed;
+        mTimestamp = pkg->timestamp;
+        uint32_t diff = ((uint32_t)pkg->end_angle + 36000 - (uint32_t)pkg->start_angle) % 36000;
+        float step = diff / (POINT_PER_PACK - 1) / 100.0;
+        float start = (double)pkg->start_angle / 100.0;
+        float end = (double)(pkg->end_angle % 36000) / 100.0;
+        PointData data;
+        for (int i = 0; i < POINT_PER_PACK; i++)
+        {
+          data.distance = pkg->point[i].distance;
+          data.angle = start + i * step;
+          if (data.angle >= 360.0)
+          {
+            data.angle -= 360.0;
+          }
+          data.confidence = pkg->point[i].confidence;
+          mOnePkg[i] = data;
+          mFrameTmp.push_back(PointData(data.angle, data.distance, data.confidence));
+        }
+        // prevent angle invert
+        mOnePkg.back().angle = end;
 
-		mIsPkgReady = true;
-	  }
+        mIsPkgReady = true;
+      }
 
-	  for (uint32_t i = 0; i < sizeof(LiDARFrameTypeDef); i++)
-	  {
-		mDataTmp.erase(mDataTmp.begin());
-	  }
+      for (uint32_t i = 0; i < sizeof(LiDARFrameTypeDef); i++)
+      {
+        mDataTmp.erase(mDataTmp.begin());
+      }
 
-	  if (mDataTmp.size() < sizeof(LiDARFrameTypeDef))
-	  {
-		break;
-	  }
-	}
-	else
-	{
-	  mErrorTimes++;
-	  /*only remove header,not all frame,because lidar data may contain head*/
-	  for (int i = 0; i < 2; i++)
-	  {
-		mDataTmp.erase(mDataTmp.begin());
-	  }
-	}
+      if (mDataTmp.size() < sizeof(LiDARFrameTypeDef))
+      {
+        break;
+      }
+    }
+    else
+    {
+      mErrorTimes++;
+      /*only remove header,not all frame,because lidar data may contain head*/
+      for (int i = 0; i < 2; i++)
+      {
+        mDataTmp.erase(mDataTmp.begin());
+      }
+    }
   }
 
   return true;
@@ -180,31 +187,31 @@ bool LiPkg::AssemblePacket()
   int count = 0;
   for (auto n : mFrameTmp)
   {
-	/*wait for enough data, need enough data to show a circle*/
-	if (n.angle - last_angle < (-350.f)) /* enough data has been obtained */
-	{
-	  Tofbf tofbfLd06(GetSpeed());
-	  // std::cout << GetSpeed() << std::endl;
-	  tmp = tofbfLd06.NearFilter(tmp);
-	  std::sort(tmp.begin(), tmp.end(), [](PointData a, PointData b) { return a.angle < b.angle; });
-	  if (tmp.size() > 0)
-	  {
-		ToLaserscan(tmp);
-		mFrameReady = true;
-		for (auto i = 0; i < count; i++)
-		{
-		  mFrameTmp.erase(mFrameTmp.begin());
-		}
-		return true;
-	  }
-	}
-	else
-	{
-	  tmp.push_back(n); /* getting data */
-	}
+    /*wait for enough data, need enough data to show a circle*/
+    if (n.angle - last_angle < (-350.f)) /* enough data has been obtained */
+    {
+      Tofbf tofbfLd06(GetSpeed());
+      // std::cout << GetSpeed() << std::endl;
+      tmp = tofbfLd06.NearFilter(tmp);
+      std::sort(tmp.begin(), tmp.end(), [](PointData a, PointData b) { return a.angle < b.angle; });
+      if (tmp.size() > 0)
+      {
+        ToLaserscan(tmp);
+        mFrameReady = true;
+        for (auto i = 0; i < count; i++)
+        {
+          mFrameTmp.erase(mFrameTmp.begin());
+        }
+        return true;
+      }
+    }
+    else
+    {
+      tmp.push_back(n); /* getting data */
+    }
 
-	count++;
-	last_angle = n.angle;
+    count++;
+    last_angle = n.angle;
   }
 
   return false;
@@ -226,7 +233,8 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
   angle_max = 3.14159 * 2;
   range_min = 0.03;
   range_max = 15.0;
-  /*Angle resolution, the smaller the resolution, the smaller the error after conversion*/
+  /*Angle resolution, the smaller the resolution, the smaller the error after
+   * conversion*/
   angle_increment = ANGLE_TO_RADIAN(mSpeed / 4500);
   /*Calculate the number of scanning points*/
   unsigned int beam_size = ceil((angle_max - angle_min) / angle_increment);
@@ -246,38 +254,39 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
 
   for (auto point : src)
   {
-	float range = point.distance * mUnitScale;
+    float range = point.distance * mUnitScale;
 
-	float angle;
-	switch (mRotVerse)
-	{
-	  case ROTATION::CLOCKWISE:
-		angle = ANGLE_TO_RADIAN(point.angle);
-		break;
+    float angle;
+    switch (mRotVerse)
+    {
+      case ROTATION::CLOCKWISE:
+        angle = ANGLE_TO_RADIAN(point.angle);
+        break;
 
-	  default:
-	  case ROTATION::COUNTERCLOCKWISE:
-		angle = ANGLE_TO_RADIAN(360. - point.angle);
-		break;
-	}
+      default:
+      case ROTATION::COUNTERCLOCKWISE:
+        angle = ANGLE_TO_RADIAN(360. - point.angle);
+        break;
+    }
 
-	int index = (int)((angle - mOutScan->angle_min) / mOutScan->angle_increment);
-	if (index >= 0 && index < beam_size)
-	{
-	  /*If the current content is Nan, it is assigned directly*/
-	  if (std::isnan(mOutScan->ranges[index]))
-	  {
-		mOutScan->ranges[index] = range;
-	  }
-	  else
-	  { /*Otherwise, only when the distance is less than the current value, it can be re assigned*/
-		if (range < mOutScan->ranges[index])
-		{
-		  mOutScan->ranges[index] = range;
-		}
-	  }
-	  mOutScan->intensities[index] = point.confidence;
-	}
+    int index = (int)((angle - mOutScan->angle_min) / mOutScan->angle_increment);
+    if (index >= 0 && index < beam_size)
+    {
+      /*If the current content is Nan, it is assigned directly*/
+      if (std::isnan(mOutScan->ranges[index]))
+      {
+        mOutScan->ranges[index] = range;
+      }
+      else
+      { /*Otherwise, only when the distance is less than the current
+           value, it can be re assigned*/
+        if (range < mOutScan->ranges[index])
+        {
+          mOutScan->ranges[index] = range;
+        }
+      }
+      mOutScan->intensities[index] = point.confidence;
+    }
   }
 }
 
