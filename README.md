@@ -26,11 +26,11 @@ The node is now activated and the `/lidar_node/scan` topic of type `sensor_msgs/
 
 ### Load parameter from launch file and start a Lifecycle manager
 
-The [parameter of the node](#parameters) can be modified by editing the [`lidar_node/config/ldlidar.yaml`](./lidar_node/config/ldlidar.yaml) file.
+The [parameter of the node](#parameters) can be modified by editing the [`lidar_node/config/ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml) file.
 
 Furthermore, thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possible to launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) that will take care of processing the state transitions described above.
 
-An example Python launch file is provided in [`lidar_node/launch/ldlidar_with_mgr.launch.py`](lidar_node/launch/ldlidar_with_mgr.launch.py) that illustrates how to start a `ldlidar_node` that loads the parameters from the`'ldlidar.yaml` file and starts the `lifecycle_manager` correctly configure with the `lifecycle_mgr.yaml` file to manage the lifecycle processing:
+An example Python launch file is provided in [`lidar_node/launch/ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py) that illustrates how to start a `ldlidar_node` that loads the parameters from the`'ldlidar.yaml` file and starts the `lifecycle_manager` correctly configure with the `lifecycle_mgr.yaml` file to manage the lifecycle processing:
 
     $ ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
 
