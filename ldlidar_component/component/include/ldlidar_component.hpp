@@ -61,6 +61,13 @@ protected:
   void getLidarParams();
   // <---- Node Parameters
 
+  // ----> Log functions
+  void info(const std::string& msg);
+  void debug(const std::string& msg);
+  void warning(const std::string& msg);
+  void error(const std::string& msg);
+  // <---- Log functions
+
   bool initLidar();
   bool initLidarComm();
   void startLidarThread();

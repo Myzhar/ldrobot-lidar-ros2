@@ -1,0 +1,22 @@
+# config/ldlidar.yaml
+#
+# Example configuration file to configure a `ldlidar_node`
+
+/**:
+  ros__parameters:
+    general:     
+      debug_mode:       true            # true to activate debug messages
+
+    comm: 
+      direct_serial:    false           # false to use usb to serial converter
+      serial_port:      ""              # serial port name if `direct-serial` is true
+
+    lidar:
+      frame_id:         "lidar_link"    # TF frame name for the lidar
+      rot_verse:        1               # 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
+      units:            2               # 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+      qos_history:      1               # 0 -> `RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_HISTORY_KEEP_LAST` / 2 -> `RMW_QOS_POLICY_HISTORY_KEEP_ALL`
+      qos_depth:        1               # History depth in case of `RMW_QOS_POLICY_HISTORY_KEEP_LAST`
+      qos_reliability:  1               # 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
+      qos_durability:   2               # 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
+      

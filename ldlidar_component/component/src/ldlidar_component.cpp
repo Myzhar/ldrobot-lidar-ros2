@@ -142,9 +142,10 @@ void LdLidarComponent::getLidarParams()
   }
 
   getParam("lidar.qos_reliability", qos_reliability, qos_reliability);
-  if (qos_reliability < 0 || qos_reliability >= static_cast<int>(RMW_QOS_POLICY_RELIABILITY_RELIABLE))
+  if (qos_reliability < 0 || qos_reliability >= static_cast<int>(RMW_QOS_POLICY_RELIABILITY_UNKNOWN))
   {
-    RCLCPP_WARN_STREAM(get_logger(), "QoS Reliability value not valid (" << qos_reliability << "). Using default value");
+    RCLCPP_WARN_STREAM(get_logger(),
+                       "QoS Reliability value not valid (" << qos_reliability << "). Using default value");
     mLidarQos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
   }
   else
@@ -155,7 +156,7 @@ void LdLidarComponent::getLidarParams()
                                        << tools::qos2str(static_cast<rmw_qos_reliability_policy_t>(qos_reliability)));
 
   getParam("lidar.qos_durability", qos_durability, qos_durability);
-  if (qos_durability < 0 || qos_durability >= static_cast<int>(RMW_QOS_POLICY_DURABILITY_VOLATILE))
+  if (qos_durability < 0 || qos_durability >= static_cast<int>(RMW_QOS_POLICY_DURABILITY_UNKNOWN))
   {
     RCLCPP_WARN_STREAM(get_logger(), "QoS Durability value not valid (" << qos_durability << "). Using default value");
     mLidarQos.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
@@ -172,12 +173,10 @@ void LdLidarComponent::getLidarParams()
 template <typename T>
 void LdLidarComponent::getParam(std::string paramName, T defValue, T& outVal, std::string log_info)
 {
-  rcl_interfaces::msg::ParameterDescriptor descr;
+  declare_parameter(paramName, rclcpp::ParameterValue(defValue));
 
   if (!get_parameter(paramName, outVal))
   {
-    declare_parameter(paramName, rclcpp::ParameterValue(defValue));
-
     RCLCPP_WARN_STREAM(get_logger(), "The parameter '"
                                          << paramName << "' is not available or is not valid, using the default value: "
                                          << defValue);

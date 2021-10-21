@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ldlidar_container_node)
+project(ldlidar_node)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -74,6 +74,25 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
+# Install PARAMS files
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Install URDF files
+install(DIRECTORY
+  urdf
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Install LAUNCH files
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Testing
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
