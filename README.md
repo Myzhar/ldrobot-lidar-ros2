@@ -50,9 +50,10 @@ Following the list of node parameters:
 * `lidar.qos_durability`: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
 
 # TODO
-* Rviz2 launch
-* URDF/xacro
-* Node diagnostic
+* Complete Node diagnostic
+* Add URDF/xacro
+* Add Rviz2 launch
+
 
 
 
