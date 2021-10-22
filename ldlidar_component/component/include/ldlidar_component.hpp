@@ -10,6 +10,9 @@
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rcutils/logging_macros.h"
 #include "sensor_msgs/msg/laser_scan.hpp"
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.hpp>
+
 #include "visibility_control.hpp"
 
 namespace lc = rclcpp_lifecycle;
@@ -49,6 +52,10 @@ public:
   /// \brief Callback from transition to "error" state.
   /// \param[in] state The current state that the node is in.
   LNI::CallbackReturn on_error(const lc::State& prev_state) override;
+
+  /// \brief Callback for diagnostic updater
+  /// \param[in] stat The current diagnostic status
+  void callback_updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
 
 protected:
   // ----> Node Parameters
@@ -100,6 +107,9 @@ private:
   rclcpp::QoS mLidarQos;
   // <---- QoS
 
+  // Diagnostic updater
+  diagnostic_updater::Updater mDiagUpdater;
+
   // Lidar
   std::unique_ptr<LiPkg> mLidar;
 
@@ -109,6 +119,10 @@ private:
   // Lidar Thread
   std::thread mLidarThread;
   bool mThreadStop = false;
+
+  // Diagnostic
+  double mPubFreq;
+  bool mPublishing;
 };
 
 }  // namespace ldlidar

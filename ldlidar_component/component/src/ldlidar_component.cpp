@@ -1,14 +1,17 @@
 #include "ldlidar_component.hpp"
 #include "ldlidar_tools.hpp"
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "rmw/types.h"
+#include "rclcpp/parameter.hpp"
+#include "rclcpp/exceptions.hpp"
 
 using namespace std::placeholders;
 
 namespace ldlidar
 {
 LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions& options)
-  : rclcpp_lifecycle::LifecycleNode("lidar_node", options), mLidarQos(1)
+  : rclcpp_lifecycle::LifecycleNode("lidar_node", options), mLidarQos(1), mDiagUpdater(this)
 {
   RCLCPP_INFO(get_logger(), "****************************************");
   RCLCPP_INFO(get_logger(), " LDRobot DToF Lidar Lifecycle Component ");
@@ -19,6 +22,11 @@ LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions& options)
   RCLCPP_INFO(get_logger(),
               "State: 'unconfigured [1]'. Use lifecycle commands "
               "to configure [1] or shutdown [5]");
+
+  // ----> Diagnostic
+  mDiagUpdater.add("LDLidar Diagnostic", this, &LdLidarComponent::callback_updateDiagnostic);
+  mDiagUpdater.setHardwareID("LDRobot lidar");
+  // <---- Diagnostic
 }
 
 LdLidarComponent::~LdLidarComponent()
@@ -173,7 +181,14 @@ void LdLidarComponent::getLidarParams()
 template <typename T>
 void LdLidarComponent::getParam(std::string paramName, T defValue, T& outVal, std::string log_info)
 {
-  declare_parameter(paramName, rclcpp::ParameterValue(defValue));
+  try
+  {
+    declare_parameter(paramName, rclcpp::ParameterValue(defValue));
+  }
+  catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException& ex)
+  {
+    RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
+  }
 
   if (!get_parameter(paramName, outVal))
   {
@@ -303,17 +318,13 @@ void LdLidarComponent::publishLaserScan()
     return;
   }
 
-  int nSub = count_subscribers(mScanTopic);
-  if (nSub > 0)
-  {
-    auto msg = mLidar->GetLaserScan();
-    mLidar->ResetFrameReady();
-    // We independently from the current state call publish on the lifecycle
-    // publisher.
-    // Only if the publisher is in an active state, the message transfer is
-    // enabled and the message actually published.
-    mScanPub->publish(std::move(msg));
-  }
+  auto msg = mLidar->GetLaserScan();
+  mLidar->ResetFrameReady();
+  // We independently from the current state call publish on the lifecycle
+  // publisher.
+  // Only if the publisher is in an active state, the message transfer is
+  // enabled and the message actually published.
+  mScanPub->publish(std::move(msg));
 }
 
 bool LdLidarComponent::initLidar()
@@ -411,6 +422,9 @@ void LdLidarComponent::lidarThreadFunc()
   RCLCPP_DEBUG(get_logger(), "Lidar thread started");
 
   mThreadStop = false;
+  rclcpp::Time prev_ts = get_clock()->now();
+  mPublishing = false;
+
   while (1)
   {
     // ----> Interruption check
@@ -427,13 +441,57 @@ void LdLidarComponent::lidarThreadFunc()
     }
     // <---- Interruption check
 
-    if (mLidar->IsFrameReady())
+    int nSub = count_subscribers(mScanTopic);
+    if (nSub > 0)
     {
-      publishLaserScan();
+      mPublishing = true;
+      if (mLidar->IsFrameReady())
+      {
+        rclcpp::Time ts = get_clock()->now();
+        double dt = (ts - prev_ts).nanoseconds();
+
+        mPubFreq = (1e9 / dt);
+
+        publishLaserScan();
+        prev_ts = ts;
+      }
+    }
+    else
+    {
+      mPublishing = false;
     }
   }
 
   RCLCPP_DEBUG(get_logger(), "Lidar thread finished");
+}
+
+void LdLidarComponent::callback_updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
+{
+  rclcpp_lifecycle::State state = get_current_state();
+
+  if (state.id() == 3)  // ACTIVE
+  {
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, std::string("Node state: ") + state.label());
+
+    stat.addf("Single acquire frequency", "%.3f Hz", mLidar->GetSpeed());
+
+    if (mPublishing)
+    {
+      stat.addf("Publish frequency:", "%.3f Hz", mPubFreq);
+    }
+    else
+    {
+      stat.add("Publish frequency:", "NO SUBSCRIBERS");
+    }
+  }
+  else if (state.id() == 1 || state.id() == 2)  // UNCONFIGURED || INACTIVE
+  {
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::STALE, std::string("Node state: ") + state.label());
+  }
+  else  // SHUTDOWN || ERROR
+  {
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, std::string("Node state: ") + state.label());
+  }
 }
 
 }  // namespace ldlidar
