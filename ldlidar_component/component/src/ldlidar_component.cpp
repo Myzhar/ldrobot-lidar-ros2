@@ -473,15 +473,15 @@ void LdLidarComponent::callback_updateDiagnostic(diagnostic_updater::DiagnosticS
   {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, std::string("Node state: ") + state.label());
 
-    stat.addf("Single acquire frequency", "%.3f Hz", mLidar->GetSpeed());
+    stat.addf("Single measure", "%.3f Hz", mLidar->GetSpeed());
 
     if (mPublishing)
     {
-      stat.addf("Publish frequency:", "%.3f Hz", mPubFreq);
+      stat.addf("Publishing", "%.3f Hz", mPubFreq);
     }
     else
     {
-      stat.add("Publish frequency:", "NO SUBSCRIBERS");
+      stat.add("Publishing", "NO SUBSCRIBERS");
     }
   }
   else if (state.id() == 1 || state.id() == 2)  // UNCONFIGURED || INACTIVE
