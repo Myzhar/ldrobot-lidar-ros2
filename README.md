@@ -24,15 +24,23 @@ The node is now in `INACTIVE` state, enter the following command to activate:
     
 The node is now activated and the `/lidar_node/scan` topic of type `sensor_msgs/msg/LaserScan` is available to be subscribed.
 
-### Launch file with YAML parameters and Lifecycle manager
+### Launch file with YAML parameters
 
 The [parameters of the node](#parameters) can be modified by editing the file [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml).
 
-Furthermore, thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possible to launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) that will take care of processing the state transitions described above.
+Open a terminal console and enter the following command:
 
-An example Python launch file is provided in the file [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py) that illustrates how to start a `ldlidar_node` that loads the parameters from the `ldlidar.yaml` filem and starts the `lifecycle_manager` correctly configured with the file [`lifecycle_mgr.yaml`](ldlidar_node/config/lifecycle_mgr.yaml) to manage the lifecycle processing:
+    $ ros2 launch ldlidar_node ldlidar.launch.py
+
+### Launch file with YAML parameters and Lifecycle manager
+
+Thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possible to launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) that will take care of processing the state transitions described above.
+
+An example Python launch file is provided in the file [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py) that illustrates how to start a `ldlidar_node` that loads the parameters from the `ldlidar.yaml` file and starts the `lifecycle_manager` correctly configured with the file [`lifecycle_mgr.yaml`](ldlidar_node/config/lifecycle_mgr.yaml) to manage the lifecycle processing:
 
     $ ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
+
+The `ldlidar_with_mgr.launch.py` launch automatically starts the `ldlidar_node` by including the `ldlidar.launch.py` launch file.
 
 ## Parameters
 
