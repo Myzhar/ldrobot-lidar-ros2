@@ -6,10 +6,12 @@ ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes
 The node has bee tested with ROS2 Foxy on Ubuntu 20.04.
 
 Clone the repository in your ROS2 workspace:
+
     cd ~/ros2_ws/src/ #use your current ros2 workspace folder
     git clone https://github.com/stereolabs/zed-ros2-wrapper.git
 
 Build the packages:
+
     cd ..
     rosdep install --from-paths src --ignore-src -r -y
     colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
