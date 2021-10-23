@@ -1,15 +1,28 @@
-# ldrobot-lidar-ros2
-ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes
+<h1 align="center">
+  ldrobot-lidar-ros2
+</h1>
+
+<h4 align="center">ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes</h4>
+
+<p align="center">
+  <a href="#install-the-node">Install</a> •
+  <a href="#start-the-node">Start the Node</a> •
+  <a href="#parameters">Parameters</a> •
+  <a href="#todo">Todo</a>
+</p>
+<br>
 
 ## Install the node
 
 The node has bee tested with ROS2 Foxy on Ubuntu 20.04.
 
 Clone the repository in your ROS2 workspace:
+
     cd ~/ros2_ws/src/ #use your current ros2 workspace folder
     git clone https://github.com/stereolabs/zed-ros2-wrapper.git
 
 Build the packages:
+
     cd ..
     rosdep install --from-paths src --ignore-src -r -y
     colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
@@ -64,16 +77,16 @@ The `ldlidar_with_mgr.launch.py` launch automatically starts the `ldlidar_node` 
 
 Following the list of node parameters:
 
-* `general.debug_mode`: set to `true` to activate debug messages
-* `comm.direct_serial`: set to `false` to use the USB <-> UART converter, `true` for direct UART connection 
-* `comm.serial_port`: the serial port path if using direct UART connection
-* `lidar.frame_id`: TF frame name for the lidar
-* `lidar.rot_verse`: 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
-* `lidar.units`: 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
-* `lidar.qos_history`: 0 -> `RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_HISTORY_KEEP_LAST` / 2 -> `RMW_QOS_POLICY_HISTORY_KEEP_ALL`
-* `lidar.qos_depth`: History depth in case of `RMW_QOS_POLICY_HISTORY_KEEP_LAST` 
-* `lidar.qos_reliability`: 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
-* `lidar.qos_durability`: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
+* **`general.debug_mode`**: set to `true` to activate debug messages
+* **`comm.direct_serial`**: set to `false` to use the USB <-> UART converter, `true` for direct UART connection 
+* **`comm.serial_port`**: the serial port path if using direct UART connection
+* **`lidar.frame_id`**: TF frame name for the lidar
+* **`lidar.rot_verse`**: 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
+* **`lidar.units`**: 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+* **`lidar.qos_history`**: 0 -> `RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_HISTORY_KEEP_LAST` / 2 -> `RMW_QOS_POLICY_HISTORY_KEEP_ALL`
+* **`lidar.qos_depth`**: History depth in case of `RMW_QOS_POLICY_HISTORY_KEEP_LAST` 
+* **`lidar.qos_reliability`**: 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
+* **`lidar.qos_durability`**: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
 
 # TODO
 * Rviz2 launch
