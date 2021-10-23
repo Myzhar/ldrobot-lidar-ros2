@@ -5,9 +5,9 @@
   <version>0.1.0</version>
   <description>Package containing driver for LDRobot 2D DToF lidars. Based on ROS2 lifecycle concepts.</description>
   
-  <maintainer email="myzhar@myyzhar.org">Myzhar</maintainer>
-  <license>MIT</license>
+  <maintainer email="walter.lucetti@myzhar.com">Walter "Myzhar" Lucetti</maintainer>  
   <author email="walter.lucetti@myzhar.com">Walter "Myzhar" Lucetti</author>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
