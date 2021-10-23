@@ -1,5 +1,16 @@
-# ldrobot-lidar-ros2
-ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes
+<h1 align="center">
+  ldrobot-lidar-ros2
+</h1>
+
+<h4 align="center">ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes</h4>
+
+<p align="center">
+  <a href="#install-the-node">Install</a> •
+  <a href="#start-the-node">Start the Node</a> •
+  <a href="#parameters">Parameters</a> •
+  <a href="#todo">Todo</a>
+</p>
+<br>
 
 ## Install the node
 
