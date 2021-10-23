@@ -77,16 +77,16 @@ The `ldlidar_with_mgr.launch.py` launch automatically starts the `ldlidar_node` 
 
 Following the list of node parameters:
 
-* `general.debug_mode`: set to `true` to activate debug messages
-* `comm.direct_serial`: set to `false` to use the USB <-> UART converter, `true` for direct UART connection 
-* `comm.serial_port`: the serial port path if using direct UART connection
-* `lidar.frame_id`: TF frame name for the lidar
-* `lidar.rot_verse`: 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
-* `lidar.units`: 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
-* `lidar.qos_history`: 0 -> `RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_HISTORY_KEEP_LAST` / 2 -> `RMW_QOS_POLICY_HISTORY_KEEP_ALL`
-* `lidar.qos_depth`: History depth in case of `RMW_QOS_POLICY_HISTORY_KEEP_LAST` 
-* `lidar.qos_reliability`: 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
-* `lidar.qos_durability`: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
+* **`general.debug_mode`**: set to `true` to activate debug messages
+* **`comm.direct_serial`**: set to `false` to use the USB <-> UART converter, `true` for direct UART connection 
+* **`comm.serial_port`**: the serial port path if using direct UART connection
+* **`lidar.frame_id`**: TF frame name for the lidar
+* **`lidar.rot_verse`**: 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
+* **`lidar.units`**: 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+* **`lidar.qos_history`**: 0 -> `RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_HISTORY_KEEP_LAST` / 2 -> `RMW_QOS_POLICY_HISTORY_KEEP_ALL`
+* **`lidar.qos_depth`**: History depth in case of `RMW_QOS_POLICY_HISTORY_KEEP_LAST` 
+* **`lidar.qos_reliability`**: 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
+* **`lidar.qos_durability`**: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
 
 # TODO
 * Rviz2 launch
