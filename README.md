@@ -1,26 +1,44 @@
 # ldrobot-lidar-ros2
 ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes
 
+## Install the node
+
+The node has bee tested with ROS2 Foxy on Ubuntu 20.04.
+
+Clone the repository in your ROS2 workspace:
+    cd ~/ros2_ws/src/ #use your current ros2 workspace folder
+    git clone https://github.com/stereolabs/zed-ros2-wrapper.git
+
+Build the packages:
+    cd ..
+    rosdep install --from-paths src --ignore-src -r -y
+    colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
+
+Update the environment variables:
+
+    echo source $(pwd)/install/local_setup.bash >> ~/.bashrc
+    source ~/.bashrc
+
 ## Start the node
 
 ### Default parameters
 
 Open a terminal console and enter the following command:
 
-    $ ros2 run ldlidar_node ldlidar_node
+    ros2 run ldlidar_node ldlidar_node
 
 the `ldlidar` node is based on the [`ROS2 lifecycle` architecture](https://design.ros2.org/articles/node_lifecycle.html), hence it starts in `UNCONFIGURED` state.
 To configure the node, set all the parameters to the default value, activate the publisher,and try to estabilish a connection, the lifecycle services must be called.
 
 Open a new terminal console and enter the following command: 
 
-    $ ros2 lifecycle set /lidar_node configure
+    ros2 lifecycle set /lidar_node configure
 
 `Transitioning successful` is returned if the node is correctly configured and the connection is estabilished, `Transitioning failed` in case of errors. Look at the node log for information about eventual connection problems.
 
 The node is now in `INACTIVE` state, enter the following command to activate:
 
-    $ ros2 lifecycle set /lidar_node activate
+    ros2 lifecycle set /lidar_node activate
     
 The node is now activated and the `/lidar_node/scan` topic of type `sensor_msgs/msg/LaserScan` is available to be subscribed.
 
@@ -30,7 +48,7 @@ The [parameters of the node](#parameters) can be modified by editing the file [`
 
 Open a terminal console and enter the following command:
 
-    $ ros2 launch ldlidar_node ldlidar.launch.py
+    ros2 launch ldlidar_node ldlidar.launch.py
 
 ### Launch file with YAML parameters and Lifecycle manager
 
@@ -38,7 +56,7 @@ Thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possib
 
 An example Python launch file is provided in the file [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py) that illustrates how to start a `ldlidar_node` that loads the parameters from the `ldlidar.yaml` file and starts the `lifecycle_manager` correctly configured with the file [`lifecycle_mgr.yaml`](ldlidar_node/config/lifecycle_mgr.yaml) to manage the lifecycle processing:
 
-    $ ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
+    ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
 
 The `ldlidar_with_mgr.launch.py` launch automatically starts the `ldlidar_node` by including the `ldlidar.launch.py` launch file.
 
@@ -59,6 +77,7 @@ Following the list of node parameters:
 
 # TODO
 * Rviz2 launch
+* Direct serial connection without USB<->Serial converter
 
 
 
