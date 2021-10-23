@@ -99,7 +99,7 @@ class LiPkg
 public:
 public:
   LiPkg(rclcpp::Clock::SharedPtr clock, UNITS unit = UNITS::METERS, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE,
-        std::string lidarFrame = "lidar_link");
+        std::string lidarFrame = "ldlidar_link");
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)
   {
@@ -147,7 +147,7 @@ private:
   // ----> Parameters
   double mUnitScale = 1e-3;
   ROTATION mRotVerse = ROTATION::COUNTERCLOCKWISE;
-  std::string mLidarFrame = "lidar_link";
+  std::string mLidarFrame = "ldlidar_link";
   // <---- Parameters
 };
 }  // namespace ldlidar

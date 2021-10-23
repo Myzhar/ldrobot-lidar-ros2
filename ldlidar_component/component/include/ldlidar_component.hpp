@@ -92,7 +92,7 @@ private:
 
   UNITS mUnits = UNITS::METERS;
   ROTATION mRotVerse = ROTATION::CLOCKWISE;
-  std::string mFrameId = "lidar_link";
+  std::string mFrameId = "ldlidar_link";
   // <---- Parameters
 
   // Publisher

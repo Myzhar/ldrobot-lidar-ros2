@@ -7,9 +7,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, Command
-from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node, LifecycleNode
+
 
 def generate_launch_description():
 
@@ -19,11 +18,11 @@ def generate_launch_description():
 
     node_name = LaunchConfiguration('node_name')
 
-    # Lifecycle manager configuration file
-    lc_mgr_config_path = os.path.join(
+    # Lidar node configuration file
+    lidar_config_path = os.path.join(
         get_package_share_directory('ldlidar_node'),
         'config',
-        'lifecycle_mgr.yaml'
+        'ldlidar.yaml'
     )
 
     # Launch arguments
@@ -33,27 +32,35 @@ def generate_launch_description():
         description='Name of the node'
     )
 
-    # Lifecycle manager node
-    lc_mgr_node = Node(
-        package='nav2_lifecycle_manager',
-        executable='lifecycle_manager',
-        name='lifecycle_manager',
+    # LDLidar lifecycle node
+    ldlidar_node = LifecycleNode(        
+        package = 'ldlidar_node',
+        executable = 'ldlidar_node',
+        name = node_name,
         output='screen',
         parameters=[
             # YAML files
-            lc_mgr_config_path  # Parameters
+            lidar_config_path  # Parameters
         ]
     )
 
-    # Include LDLidar launch
-    ldlidar_launch = IncludeLaunchDescription(
-        launch_description_source=PythonLaunchDescriptionSource([
-            get_package_share_directory('ldlidar_node'),
-            '/launch/ldlidar.launch.py'
-        ]),
-        launch_arguments={
-            'node_name': node_name
-        }.items()
+    # URDF path
+    urdf_file_name = 'ldlidar_descr.urdf.xml'
+    urdf = os.path.join(
+        get_package_share_directory('ldlidar_node'),
+        'urdf',
+        urdf_file_name)
+    with open(urdf, 'r') as infp:
+        robot_desc = infp.read()
+
+    # Robot State Publisher node
+    rsp_node = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='ldlidar_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_desc}],
+        arguments=[urdf]
     )
 
     # Define LaunchDescription variable
@@ -63,10 +70,10 @@ def generate_launch_description():
     ld.add_action(declare_node_name_cmd)
 
     # Launch Nav2 Lifecycle Manager
-    ld.add_action(lc_mgr_node)
+    ld.add_action(rsp_node)
 
-    # Call LDLidar launch
-    ld.add_action(ldlidar_launch)
+    # LDLidar Lifecycle node
+    ld.add_action(ldlidar_node)
 
     return ld
     

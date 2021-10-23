@@ -51,8 +51,6 @@ Following the list of node parameters:
 
 # TODO
 * Rviz2 launch
-* URDF/xacro
-* Node diagnostic
 
 
 
