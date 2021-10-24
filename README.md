@@ -8,6 +8,7 @@
   <a href="#install-the-node">Install</a> •
   <a href="#start-the-node">Start the Node</a> •
   <a href="#parameters">Parameters</a> •
+  <a href="#display_scan_on_rviz2">RViz2</a> •  
   <a href="#todo">Todo</a>
 </p>
 <br>
@@ -88,8 +89,17 @@ Following the list of node parameters:
 * **`lidar.qos_reliability`**: 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
 * **`lidar.qos_durability`**: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
 
+## Display scan on RVIZ2
+
+The launch file `ldlidar_rviz2.launch.py` starts the `ldlidar_node` node, the `lifecycle_manager` node, and a precofigured instance of RViz2 to display the 2D laser scan provided by the LDRobot sensors. This is an example to demonstrate how to correctly setup RViz2 to be used with the `ldlidar_node` node.
+
+Open a terminal console and enter the following command:
+
+    ros2 launch ldlidar_node ldlidar_rviz2.launch.py
+
+![](./images/ldlidar_rviz2.png)
+
 # TODO
-* Rviz2 launch
 * Direct serial connection without USB<->Serial converter
 
 
