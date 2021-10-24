@@ -41,8 +41,8 @@ Open a terminal console and enter the following command:
 
     ros2 run ldlidar_node ldlidar_node
 
-the `ldlidar` node is based on the [`ROS2 lifecycle` architecture](https://design.ros2.org/articles/node_lifecycle.html), hence it starts in `UNCONFIGURED` state.
-To configure the node, set all the parameters to the default value, activate the publisher,and try to estabilish a connection, the lifecycle services must be called.
+the `ldlidar` node is based on the [`ROS2 lifecycle` architecture](https://design.ros2.org/articles/node_lifecycle.html), hence it starts in the `UNCONFIGURED` state.
+To configure the node, setting all the parameters to the default value, trying to estabilish a connection, and activating the scan publisher, the lifecycle services must be called.
 
 Open a new terminal console and enter the following command: 
 
@@ -50,29 +50,33 @@ Open a new terminal console and enter the following command:
 
 `Transitioning successful` is returned if the node is correctly configured and the connection is estabilished, `Transitioning failed` in case of errors. Look at the node log for information about eventual connection problems.
 
-The node is now in `INACTIVE` state, enter the following command to activate:
+The node is now in the `INACTIVE` state, enter the following command to activate:
 
     ros2 lifecycle set /lidar_node activate
     
-The node is now activated and the `/lidar_node/scan` topic of type `sensor_msgs/msg/LaserScan` is available to be subscribed.
+The node is now activated and the `/ldlidar_node/scan` topic of type `sensor_msgs/msg/LaserScan` is available to be subscribed.
 
 ### Launch file with YAML parameters
 
-The [parameters of the node](#parameters) can be modified by editing the file [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml).
+The default values of the [parameters of the node](#parameters) can be modified by editing the file [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml).
 
-Open a terminal console and enter the following command:
+Open a terminal console and enter the following command to start the node with customized parameters:
 
     ros2 launch ldlidar_node ldlidar.launch.py
+    
+The [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml) script also starts a `robot_state_publisher` node that provides the static TF transform of the LDLidar [`ldlidar_base`->`ldlidar_link`], and provides the ldlidar description in the `/robot_description`.
+
+![](./images/ldlidar_tf.png)
 
 ### Launch file with YAML parameters and Lifecycle manager
 
-Thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possible to launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) that will take care of processing the state transitions described above.
+Thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possible to launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) node that is taking care of processing the state transitions described above.
 
-An example Python launch file is provided in the file [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py) that illustrates how to start a `ldlidar_node` that loads the parameters from the `ldlidar.yaml` file and starts the `lifecycle_manager` correctly configured with the file [`lifecycle_mgr.yaml`](ldlidar_node/config/lifecycle_mgr.yaml) to manage the lifecycle processing:
+An example launch file is provided, [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py), that illustrates how to start a `ldlidar_node` that loads the parameters from the `ldlidar.yaml` file, and starts the `lifecycle_manager` correctly configured with the file [`lifecycle_mgr.yaml`](ldlidar_node/config/lifecycle_mgr.yaml) to manage the lifecycle processing:
 
     ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
 
-The `ldlidar_with_mgr.launch.py` launch automatically starts the `ldlidar_node` by including the `ldlidar.launch.py` launch file.
+The `ldlidar_with_mgr.launch.py` script automatically starts the `ldlidar_node` by including the `ldlidar.launch.py` launch file.
 
 ## Parameters
 
@@ -98,6 +102,16 @@ Open a terminal console and enter the following command:
     ros2 launch ldlidar_node ldlidar_rviz2.launch.py
 
 ![](./images/ldlidar_rviz2.png)
+
+## Integrate the node in your robot
+
+Follow the following procedure, to integrate the `ldlidar_node` in a robot configuration:
+
+* Provide a TF transform from `base_link` to `ldlidar_base`, that is placed in the center of the base of the lidar scanner. The `ldlidar_base` -> `ldlidar_link` transform is provided by the `robot_state_publisher` started by the `ldlidar.launch.py` launch file.
+* Modify the [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml) to match the configuration of the robot.
+* Include the [`ldlidar.launch.py`](ldlidar_node/launch/ldlidar.launch.py) in the bringup launch file of the robot. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
+* Handle lifecycle to correctly start the node. You can use the Nav2 `lifecycle_manager`, by including it in the bringup launch file. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
+* Enjoy your working system
 
 # TODO
 * Direct serial connection without USB<->Serial converter
