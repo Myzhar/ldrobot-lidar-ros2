@@ -8,7 +8,7 @@
   <a href="#install-the-node">Install</a> •
   <a href="#start-the-node">Start the Node</a> •
   <a href="#parameters">Parameters</a> •
-  <a href="#display_scan_on_rviz2">RViz2</a> •  
+  <a href="#display-scan-on-rviz2">RViz2</a> •  
   <a href="#todo">Todo</a>
 </p>
 <br>
