@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
     rclcpp::executors::SingleThreadedExecutor exec;
     rclcpp::NodeOptions options;
 
-    // Add zed_camera node
+    // Add ldlidar_node node
     auto ldlidar_node = std::make_shared<ldlidar::LdLidarComponent>(options);
     exec.add_node(ldlidar_node->get_node_base_interface());
 
