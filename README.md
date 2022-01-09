@@ -21,7 +21,7 @@ The node has bee tested with ROS2 Foxy on Ubuntu 20.04.
 Clone the repository in your ROS2 workspace:
 
     cd ~/ros2_ws/src/ #use your current ros2 workspace folder
-    git clone https://github.com/stereolabs/zed-ros2-wrapper.git
+    git clone https://github.com/Myzhar/ldrobot-lidar-ros2.git
 
 Build the packages:
 
