@@ -23,6 +23,10 @@ Clone the repository in your ROS2 workspace:
     cd ~/ros2_ws/src/ #use your current ros2 workspace folder
     git clone https://github.com/Myzhar/ldrobot-lidar-ros2.git
 
+Add dependencies:
+
+    sudo apt install libudev-dev
+
 Build the packages:
 
     cd ..
