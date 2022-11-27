@@ -4,7 +4,7 @@
   schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>ldlidar</name>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <description>LDRobot Lidar ROS2 support meta package</description>
 
   <maintainer email="myzhar@myzhar.com">Myzhar</maintainer>
