@@ -53,7 +53,7 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz2',
         output='screen',
-        arguments=[rviz2_config]
+        arguments=[["-d"], [rviz2_config]]
     )
 
     # Include LDLidar with lifecycle manager launch

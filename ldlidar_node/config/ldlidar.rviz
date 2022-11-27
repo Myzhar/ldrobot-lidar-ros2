@@ -4,12 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Status1
         - /RobotModel1/Mass Properties1
         - /RobotModel1/Description Topic1
         - /TF1/Tree1
-        - /TF1/Tree1/ldlidar_base1
       Splitter Ratio: 0.5
     Tree Height: 787
   - Class: rviz_common/Selection
@@ -61,7 +58,7 @@ Visualization Manager:
       Description Topic:
         Depth: 1
         Durability Policy: Transient Local
-        History Policy: Keep Last
+        History Policy: Keep All
         Reliability Policy: Reliable
         Value: /robot_description
       Enabled: true
@@ -109,7 +106,7 @@ Visualization Manager:
       Update Interval: 0
       Value: true
     - Alpha: 1
-      Autocompute Intensity Bounds: false
+      Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 5
         Min Value: 0
@@ -123,9 +120,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: true
       Max Color: 0; 0; 255
-      Max Intensity: 242
+      Max Intensity: 239
       Min Color: 0; 0; 0
-      Min Intensity: 45
+      Min Intensity: 90
       Name: LaserScan
       Position Transformer: XYZ
       Selectable: false
@@ -135,7 +132,7 @@ Visualization Manager:
       Topic:
         Depth: 1
         Durability Policy: Volatile
-        Filter size: 10
+        Filter size: 1
         History Policy: Keep Last
         Reliability Policy: Best Effort
         Value: /ldlidar_node/scan
@@ -195,7 +192,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 114.91304779052734
+      Scale: 103.35262298583984
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
       X: 0

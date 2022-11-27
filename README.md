@@ -28,9 +28,14 @@ Add dependencies:
 
     sudo apt install libudev-dev
 
+Install the udev rules
+
+    cd ~/ros2_ws/src/ldrobot-lidar-ros2/scripts/ù
+    ./create_udev_rules.sh
+
 Build the packages:
 
-    cd ..
+    cd ~/ros2_ws/src/
     rosdep install --from-paths src --ignore-src -r -y
     colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
 
