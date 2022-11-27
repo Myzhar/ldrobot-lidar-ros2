@@ -98,6 +98,7 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
+find_package(nav2_util REQUIRED)
 
 find_package(UDEV REQUIRED)
 

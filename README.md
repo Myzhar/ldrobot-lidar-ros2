@@ -2,7 +2,8 @@
   ldrobot-lidar-ros2
 </h1>
 
-<h4 align="center">ROS2 package for LDRobot lidar. Based on ROS2 Lifecycle nodes</h4>
+<h4 align="center">ROS2 package for LDRobot lidar. Based on 
+[Nav2 Lifecycle nodes](https://navigation.ros.org/concepts/index.html?highlight=lifecycle#lifecycle-nodes-and-bond)</h4>
 
 <p align="center">
   <a href="#install-the-node">Install</a> •
@@ -16,7 +17,7 @@
 
 ## Install the node
 
-The node has bee tested with ROS2 Foxy on Ubuntu 20.04.
+The node is designed to work in [ROS2 Humble](https://docs.ros.org/en/humble/index.html).
 
 Clone the repository in your ROS2 workspace:
 
@@ -93,10 +94,6 @@ Following the list of node parameters:
 * **`lidar.frame_id`**: TF frame name for the lidar
 * **`lidar.rot_verse`**: 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
 * **`lidar.units`**: 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
-* **`lidar.qos_history`**: 0 -> `RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_HISTORY_KEEP_LAST` / 2 -> `RMW_QOS_POLICY_HISTORY_KEEP_ALL`
-* **`lidar.qos_depth`**: History depth in case of `RMW_QOS_POLICY_HISTORY_KEEP_LAST` 
-* **`lidar.qos_reliability`**: 0 -> `RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_RELIABILITY_RELIABLE` / 2 -> `RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT`
-* **`lidar.qos_durability`**: 0 -> `RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT` / 1 -> `RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL` / 2 -> `RMW_QOS_POLICY_DURABILITY_VOLATILE`
 
 ## Display scan on RVIZ2
 

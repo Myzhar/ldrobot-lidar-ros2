@@ -85,7 +85,6 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(rcutils REQUIRED)
-find_package(nav2_util REQUIRED)
 find_package(ldlidar_component REQUIRED)
 
 ###############################################################################
