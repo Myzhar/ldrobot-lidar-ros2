@@ -33,10 +33,11 @@ def generate_launch_description():
     )
 
     # LDLidar lifecycle node
-    ldlidar_node = LifecycleNode(        
+    ldlidar_node = LifecycleNode(
         package = 'ldlidar_node',
         executable = 'ldlidar_node',
         name = node_name,
+        namespace='',
         output='screen',
         parameters=[
             # YAML files
@@ -76,4 +77,4 @@ def generate_launch_description():
     ld.add_action(ldlidar_node)
 
     return ld
-    
+ 
