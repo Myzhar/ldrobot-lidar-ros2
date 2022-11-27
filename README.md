@@ -9,8 +9,7 @@
   <a href="#start-the-node">Start the Node</a> •
   <a href="#parameters">Parameters</a> •
   <a href="#display-scan-on-rviz2">RViz2</a> •  
-  <a href="#integrate-the-node-in-your-robot">Robot integration</a> •  
-  <a href="#todo">Todo</a>
+  <a href="#integrate-the-node-in-your-robot">Robot integration</a>
 </p>
 <br>
 
@@ -119,8 +118,6 @@ Follow the following procedure, to integrate the `ldlidar_node` in a robot confi
 * Handle lifecycle to correctly start the node. You can use the Nav2 `lifecycle_manager`, by including it in the bringup launch file. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
 * Enjoy your working system
 
-# TODO
-* Direct serial connection without USB<->Serial converter
 
 
 

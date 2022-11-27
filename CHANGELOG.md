@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+2022-11-27
+----------
+* Add direct serial port connection feature
+
 v0.2.0 - Humble
 ---------------
 * Change license from MIT to Apache-2.0
