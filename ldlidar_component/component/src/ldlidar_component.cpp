@@ -26,7 +26,7 @@ using namespace std::placeholders;
 namespace ldlidar
 {
 LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions & options)
-: rclcpp_lifecycle::LifecycleNode("lidar_node", options), mLidarQos(1), mDiagUpdater(this)
+: nav2_util::LifecycleNode("lidar_node", "", options), mDiagUpdater(this)
 {
   RCLCPP_INFO(get_logger(), "****************************************");
   RCLCPP_INFO(get_logger(), " LDRobot DToF Lidar Lifecycle Component ");
@@ -66,7 +66,7 @@ void LdLidarComponent::getParameters()
 void LdLidarComponent::getDebugParams()
 {
   // ----> Debug mode initialization from parameters
-  getParam("general.debug_mode", mDebugMode, mDebugMode);
+  getParam("general.debug_mode", mDebugMode, mDebugMode, "Enable debug messages");
   if (mDebugMode) {
     rcutils_ret_t res = rcutils_logging_set_logger_level(
       get_logger().get_name(), RCUTILS_LOG_SEVERITY_DEBUG);
@@ -95,7 +95,9 @@ void LdLidarComponent::getCommParams()
   RCLCPP_INFO(get_logger(), "+++ COMMUNICATION PARAMETERS +++");
 
   // ----> Communication
-  getParam("comm.direct_serial", mUseDirectSerial, mUseDirectSerial);
+  getParam(
+    "comm.direct_serial", mUseDirectSerial, mUseDirectSerial,
+    "Set to 'true' if not using the UART<->USB converted [not yet available]");
   RCLCPP_INFO_STREAM(
     get_logger(), " * Direct Serial comm: " << (mUseDirectSerial ? "TRUE" : "FALSE"));
 
@@ -108,91 +110,34 @@ void LdLidarComponent::getCommParams()
 void LdLidarComponent::getLidarParams()
 {
   RCLCPP_INFO(get_logger(), "+++ LIDAR PARAMETERS +++");
+  nav2_util::LifecycleNode::integer_range limits_int;
 
   // ----> Lidar config
-  getParam("lidar.frame_id", mFrameId, mFrameId, " * Lidar frame: ");
+  getParam("lidar.frame_id", mFrameId, mFrameId, " * Lidar frame: ", "Name of the lidar frame");
   int rotVerse = static_cast<int>(mRotVerse);
-  getParam("lidar.rot_verse", rotVerse, rotVerse);
-  if (rotVerse < 0 || rotVerse > static_cast<int>(ROTATION::COUNTERCLOCKWISE)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(), "Rotation verse not valid (" << rotVerse << "). Using default value");
-    mRotVerse = ROTATION::COUNTERCLOCKWISE;
-  } else {
-    mRotVerse = static_cast<ROTATION>(rotVerse);
-  }
+
+  limits_int = {0, static_cast<int>(ROTATION::COUNTERCLOCKWISE), 1};
+  getParam(
+    "lidar.rot_verse", rotVerse, rotVerse, limits_int,
+    "Change rotation verse. To be used if the lidar is mounted upside down.", true);
+  mRotVerse = static_cast<ROTATION>(rotVerse);
   RCLCPP_INFO_STREAM(get_logger(), " * Rotation verse: " << tools::to_string(mRotVerse));
 
+  limits_int = {0, static_cast<int>(UNITS::METERS), 1};
   int units = static_cast<int>(mUnits);
-  getParam("lidar.units", units, units);
-  if (units < 0 || units > static_cast<int>(UNITS::METERS)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(),
-      "Units value not valid (" << units << "). Using default value");
-    mUnits = UNITS::METERS;
-  } else {
-    mUnits = static_cast<UNITS>(units);
-  }
+  getParam("lidar.units", units, units, limits_int, "Set measurement units");
+  mUnits = static_cast<UNITS>(units);
   RCLCPP_INFO_STREAM(get_logger(), " * Measure units: " << tools::to_string(mUnits));
-
-  int qos_history = static_cast<int>(RMW_QOS_POLICY_HISTORY_KEEP_LAST);
-  int qos_depth = 1;
-  int qos_reliability = static_cast<int>(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
-  int qos_durability = static_cast<int>(RMW_QOS_POLICY_DURABILITY_VOLATILE);
-
-  getParam("lidar.qos_history", qos_history, qos_history);
-  if (qos_history < 0 || qos_history >= static_cast<int>(RMW_QOS_POLICY_HISTORY_UNKNOWN)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(), "QoS History value not valid (" << qos_history << "). Using default value");
-    mLidarQos.history(RMW_QOS_POLICY_HISTORY_KEEP_LAST);
-  } else {
-    mLidarQos.history(static_cast<rmw_qos_history_policy_t>(qos_history));
-  }
-  RCLCPP_INFO_STREAM(
-    get_logger(),
-    " * QoS History Policy: " <<
-      tools::qos2str(static_cast<rmw_qos_history_policy_t>(qos_history)));
-
-  if (static_cast<rmw_qos_history_policy_t>(qos_history) == RMW_QOS_POLICY_HISTORY_KEEP_LAST) {
-    getParam("lidar.qos_depth", qos_depth, qos_depth, " * QoS History Depth: ");
-    mLidarQos.keep_last(qos_depth);
-  }
-
-  getParam("lidar.qos_reliability", qos_reliability, qos_reliability);
-  if (qos_reliability < 0 ||
-    qos_reliability >= static_cast<int>(RMW_QOS_POLICY_RELIABILITY_UNKNOWN))
-  {
-    RCLCPP_WARN_STREAM(
-      get_logger(),
-      "QoS Reliability value not valid (" << qos_reliability << "). Using default value");
-    mLidarQos.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
-  } else {
-    mLidarQos.reliability(static_cast<rmw_qos_reliability_policy_t>(qos_reliability));
-  }
-  RCLCPP_INFO_STREAM(
-    get_logger(), " * QoS Reliability: "
-      << tools::qos2str(static_cast<rmw_qos_reliability_policy_t>(qos_reliability)));
-
-  getParam("lidar.qos_durability", qos_durability, qos_durability);
-  if (qos_durability < 0 || qos_durability >= static_cast<int>(RMW_QOS_POLICY_DURABILITY_UNKNOWN)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(),
-      "QoS Durability value not valid (" << qos_durability << "). Using default value");
-    mLidarQos.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
-  } else {
-    mLidarQos.durability(static_cast<rmw_qos_durability_policy_t>(qos_durability));
-  }
-  RCLCPP_INFO_STREAM(
-    get_logger(),
-    " * QoS Durability: " << tools::qos2str(
-      static_cast<rmw_qos_durability_policy_t>(qos_durability)));
   // <---- Lidar config
 }
 
 template<typename T>
-void LdLidarComponent::getParam(std::string paramName, T defValue, T & outVal, std::string log_info)
+void LdLidarComponent::getParam(
+  std::string paramName, T defValue, T & outVal,
+  const std::string & description, bool read_only, std::string log_info)
 {
   try {
-    declare_parameter(paramName, rclcpp::ParameterValue(defValue));
+    add_parameter(paramName, rclcpp::ParameterValue(defValue), description, "", read_only);
   } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
     RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
   }
@@ -209,7 +154,61 @@ void LdLidarComponent::getParam(std::string paramName, T defValue, T & outVal, s
   }
 }
 
-LNI::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_state)
+void LdLidarComponent::getParam(
+  std::string paramName, int defValue, int & outVal,
+  const nav2_util::LifecycleNode::integer_range & range,
+  const std::string & description,
+  bool read_only,
+  std::string log_info)
+{
+  try {
+    add_parameter(
+      paramName, rclcpp::ParameterValue(defValue), range,
+      description, "", read_only);
+  } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
+    RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
+  }
+
+  if (!get_parameter(paramName, outVal)) {
+    RCLCPP_WARN_STREAM(
+      get_logger(), "The parameter '"
+        << paramName << "' is not available or is not valid, using the default value: "
+        << defValue);
+  }
+
+  if (!log_info.empty()) {
+    RCLCPP_INFO_STREAM(get_logger(), log_info << outVal);
+  }
+}
+
+void LdLidarComponent::getParam(
+  std::string paramName, float defValue, float & outVal,
+  const nav2_util::LifecycleNode::floating_point_range & range,
+  const std::string & description,
+  bool read_only,
+  std::string log_info)
+{
+  try {
+    add_parameter(
+      paramName, rclcpp::ParameterValue(defValue), range,
+      description, "", read_only);
+  } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
+    RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
+  }
+
+  if (!get_parameter(paramName, outVal)) {
+    RCLCPP_WARN_STREAM(
+      get_logger(), "The parameter '"
+        << paramName << "' is not available or is not valid, using the default value: "
+        << defValue);
+  }
+
+  if (!log_info.empty()) {
+    RCLCPP_INFO_STREAM(get_logger(), log_info << outVal);
+  }
+}
+
+nav2_util::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_state)
 {
   RCLCPP_DEBUG_STREAM(
     get_logger(),
@@ -231,7 +230,7 @@ LNI::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_state)
 
   // ----> Connect to Lidar
   if (!initLidar()) {
-    return LNI::CallbackReturn::ERROR;  // Transition to Finalized state
+    return nav2_util::CallbackReturn::ERROR;  // Transition to Finalized state
     // Note: we could use FAILURE instead of ERROR to remain in unconfigured
     // state and try again to connect
   }
@@ -242,14 +241,18 @@ LNI::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_state)
     "State: 'inactive [2]'. Use lifecycle commands to "
     "activate [3], cleanup [2] or shutdown "
     "[6]");
-  return LNI::CallbackReturn::SUCCESS;
+  return nav2_util::CallbackReturn::SUCCESS;
 }  // namespace ldlidar
 
-LNI::CallbackReturn LdLidarComponent::on_activate(const lc::State & prev_state)
+nav2_util::CallbackReturn LdLidarComponent::on_activate(const lc::State & prev_state)
 {
   RCLCPP_DEBUG_STREAM(
     get_logger(), "on_activate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                   << "] -> Active");
+
+  // create bond connection
+  createBond();
+
   // Activate publisher
   mScanPub->on_activate();
 
@@ -260,15 +263,19 @@ LNI::CallbackReturn LdLidarComponent::on_activate(const lc::State & prev_state)
     get_logger(),
     "State: 'active [3]'. Use lifecycle commands to "
     "deactivate [4] or shutdown [7]");
-  return LNI::CallbackReturn::SUCCESS;
+  return nav2_util::CallbackReturn::SUCCESS;
 }
 
-LNI::CallbackReturn LdLidarComponent::on_deactivate(const lc::State & prev_state)
+nav2_util::CallbackReturn LdLidarComponent::on_deactivate(const lc::State & prev_state)
 {
   RCLCPP_DEBUG_STREAM(
     get_logger(),
     "on_deactivate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                       << "] -> Inactive");
+
+  // destroy bond connection
+  destroyBond();
+
   // Dectivate publisher
   mScanPub->on_deactivate();
 
@@ -280,10 +287,10 @@ LNI::CallbackReturn LdLidarComponent::on_deactivate(const lc::State & prev_state
     "State: 'inactive [2]'. Use lifecycle commands to "
     "activate [3], cleanup [2] or shutdown "
     "[6]");
-  return LNI::CallbackReturn::SUCCESS;
+  return nav2_util::CallbackReturn::SUCCESS;
 }
 
-LNI::CallbackReturn LdLidarComponent::on_cleanup(const lc::State & prev_state)
+nav2_util::CallbackReturn LdLidarComponent::on_cleanup(const lc::State & prev_state)
 {
   RCLCPP_DEBUG_STREAM(
     get_logger(), "on_cleanup: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
@@ -295,10 +302,10 @@ LNI::CallbackReturn LdLidarComponent::on_cleanup(const lc::State & prev_state)
     get_logger(),
     "State: 'unconfigured [1]'. Use lifecycle commands "
     "to configure [1] or shutdown [5]");
-  return LNI::CallbackReturn::SUCCESS;
+  return nav2_util::CallbackReturn::SUCCESS;
 }
 
-LNI::CallbackReturn LdLidarComponent::on_shutdown(const lc::State & prev_state)
+nav2_util::CallbackReturn LdLidarComponent::on_shutdown(const lc::State & prev_state)
 {
   RCLCPP_DEBUG_STREAM(
     get_logger(), "on_shutdown: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
@@ -307,17 +314,17 @@ LNI::CallbackReturn LdLidarComponent::on_shutdown(const lc::State & prev_state)
   mScanPub.reset();
 
   RCLCPP_INFO_STREAM(get_logger(), "State: 'finalized [4]'. Press Ctrl+C to kill...");
-  return LNI::CallbackReturn::SUCCESS;
+  return nav2_util::CallbackReturn::SUCCESS;
 }
 
-LNI::CallbackReturn LdLidarComponent::on_error(const lc::State & prev_state)
+nav2_util::CallbackReturn LdLidarComponent::on_error(const lc::State & prev_state)
 {
   RCLCPP_DEBUG_STREAM(
     get_logger(), "on_error: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                << "] -> Finalized");
 
   RCLCPP_INFO_STREAM(get_logger(), "State: 'finalized [4]'. Press Ctrl+C to kill...");
-  return LNI::CallbackReturn::FAILURE;
+  return nav2_util::CallbackReturn::FAILURE;
 }
 
 void LdLidarComponent::publishLaserScan()
@@ -449,6 +456,7 @@ void LdLidarComponent::lidarThreadFunc()
         double dt = (ts - prev_ts).nanoseconds();
 
         mPubFreq = (1e9 / dt);
+        // RCLCPP_DEBUG_STREAM(get_logger(), "Lidar thread freq: " << mPubFreq << " Hz");
 
         publishLaserScan();
         prev_ts = ts;

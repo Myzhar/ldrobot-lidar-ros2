@@ -48,7 +48,7 @@ public:
 private:
   std::thread * mRxThread;
   static void mRxThreadProc(void * param);
-  int32_t mRxCount;
+  int64_t mRxCount;
   int32_t mComHandle;
   std::atomic<bool> mIsCmdOpened, mRxThreadExitFlag;
   std::function<void(const char *, size_t length)> mReadCallback;

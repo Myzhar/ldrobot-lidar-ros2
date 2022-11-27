@@ -156,7 +156,7 @@ bool CmdInterfaceLinux::GetCmdDevices(
 
 bool CmdInterfaceLinux::ReadFromIO(uint8_t * rx_buf, uint32_t rx_buf_len, uint32_t * rx_len)
 {
-  static timespec timeout = {0, 100000000};
+  static timespec timeout = {0, static_cast<int>(100 * 1e6)};
   int32_t len = -1;
 
   if (IsOpened()) {

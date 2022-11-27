@@ -43,7 +43,7 @@ def generate_launch_description():
     # RViZ2 settings
     rviz2_config = os.path.join(
         get_package_share_directory('ldlidar_node'),
-        'rviz2',
+        'config',
         'ldlidar.rviz'
     )
 
@@ -53,7 +53,7 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz2',
         output='screen',
-        arguments=[rviz2_config]
+        arguments=[["-d"], [rviz2_config]]
     )
 
     # Include LDLidar with lifecycle manager launch
