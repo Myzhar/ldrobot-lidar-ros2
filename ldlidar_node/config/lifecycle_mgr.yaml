@@ -4,6 +4,8 @@
 
 /**:
   ros__parameters:
-    autostart: true
+    autostart: True
     node_names: ['ldlidar_node']
-    bond_timeout: 3.0
+    bond_timeout: 5.0
+    attempt_respawn_reconnection: true
+    bond_respawn_max_duration: 10.0

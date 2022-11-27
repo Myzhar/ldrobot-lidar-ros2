@@ -250,6 +250,7 @@ LNI::CallbackReturn LdLidarComponent::on_activate(const lc::State & prev_state)
   RCLCPP_DEBUG_STREAM(
     get_logger(), "on_activate: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                   << "] -> Active");
+
   // Activate publisher
   mScanPub->on_activate();
 
@@ -449,6 +450,7 @@ void LdLidarComponent::lidarThreadFunc()
         double dt = (ts - prev_ts).nanoseconds();
 
         mPubFreq = (1e9 / dt);
+        //RCLCPP_DEBUG_STREAM(get_logger(), "Lidar thread freq: " << mPubFreq << " Hz");
 
         publishLaserScan();
         prev_ts = ts;
