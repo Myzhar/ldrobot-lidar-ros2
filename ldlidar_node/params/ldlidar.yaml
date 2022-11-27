@@ -4,14 +4,14 @@
 
 /**:
   ros__parameters:
-    general:     
-      debug_mode:       true            # true to activate debug messages
+    general:
+      debug_mode: true # true to activate debug messages
 
-    comm: 
-      direct_serial:    false           # false to use usb to serial converter
-      serial_port:      ""              # serial port name if `direct-serial` is true
+    comm:
+      direct_serial: false # false to use usb to serial converter
+      serial_port: "/dev/ldlidar" # serial port name if `direct-serial` is true
 
     lidar:
-      frame_id:         "ldlidar_link"    # TF frame name for the lidar
-      rot_verse:        1               # 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
-      units:            2               # 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+      frame_id: "ldlidar_link" # TF frame name for the lidar
+      rot_verse: 1 # 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
+      units: 2 # 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]

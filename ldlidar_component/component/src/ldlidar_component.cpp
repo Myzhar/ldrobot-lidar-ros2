@@ -102,7 +102,9 @@ void LdLidarComponent::getCommParams()
     get_logger(), " * Direct Serial comm: " << (mUseDirectSerial ? "TRUE" : "FALSE"));
 
   if (mUseDirectSerial) {
-    getParam("comm.serial_port", mUseDirectSerial, mUseDirectSerial, "* Serial port: ");
+    getParam(
+      "comm.serial_port", mSerialPort, mSerialPort, "Serial port name", true,
+      " * Serial port: ");
   }
   // <---- Communication
 }
@@ -363,6 +365,9 @@ bool LdLidarComponent::initLidar()
 
   if (mLidarComm->Open(mSerialPort)) {
     RCLCPP_INFO_STREAM(get_logger(), "LDLidar connection successful");
+  } else {
+    RCLCPP_ERROR_STREAM(get_logger(), "LDLidar connection failed!");
+    return false;
   }
 
   return true;
@@ -377,10 +382,10 @@ void LdLidarComponent::lidarReadCallback(const char * byte, size_t len)
 
 bool LdLidarComponent::initLidarComm()
 {
-  if (!mUseDirectSerial) {
-    // USB <-> UART converter
-    mLidarComm = std::make_unique<CmdInterfaceLinux>();
+  // USB <-> UART converter
+  mLidarComm = std::make_unique<CmdInterfaceLinux>();
 
+  if (!mUseDirectSerial) {
     std::vector<std::pair<std::string, std::string>> device_list;
 
     mLidarComm->GetCmdDevices(device_list);
@@ -401,7 +406,7 @@ bool LdLidarComponent::initLidarComm()
       "Found CP2102 USB<->UART converter. Trying to "
       "connect to lidar device...");
   } else {
-    // TODO(Myzhar) test direct serial port connection
+    RCLCPP_DEBUG_STREAM(get_logger(), "Opening Serial port: " << mSerialPort);
   }
 
   return true;

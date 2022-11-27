@@ -47,9 +47,10 @@ bool CmdInterfaceLinux::Open(std::string & port_name)
 {
   int flags = (O_RDWR | O_NOCTTY | O_NONBLOCK);
 
+  std::cerr << "CmdInterfaceLinux::Open opening" << std::endl;
   mComHandle = open(port_name.c_str(), flags);
   if (-1 == mComHandle) {
-    std::cout << "CmdInterfaceLinux::Open open error!" << std::endl;
+    std::cerr << "CmdInterfaceLinux::Open open error!" << std::endl;
     return false;
   }
 
@@ -57,7 +58,7 @@ bool CmdInterfaceLinux::Open(std::string & port_name)
   struct termios options;
   if (-1 == tcgetattr(mComHandle, &options)) {
     Close();
-    std::cout << "CmdInterfaceLinux::Open tcgetattr error!" << std::endl;
+    std::cerr << "CmdInterfaceLinux::Open tcgetattr error!" << std::endl;
     return false;
   }
 
@@ -74,7 +75,7 @@ bool CmdInterfaceLinux::Open(std::string & port_name)
   cfsetispeed(&options, B230400);
 
   if (tcsetattr(mComHandle, TCSANOW, &options) < 0) {
-    std::cout << "CmdInterfaceLinux::Open tcsetattr error!" << std::endl;
+    std::cerr << "CmdInterfaceLinux::Open tcsetattr error!" << std::endl;
     Close();
     return false;
   }
