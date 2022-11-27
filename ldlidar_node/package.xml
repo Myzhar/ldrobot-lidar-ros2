@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>ldlidar_node</name>
   <version>0.1.0</version>
   <description>Package the container executable for the ldlidar_component.</description>
   
   <maintainer email="myzhar@myzhar.org">Myzhar</maintainer>
-  <license>MIT</license>
-  <author email="walter.lucetti@myzhar.com">Walter "Myzhar" Lucetti</author>
+  <license>Apache-2</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

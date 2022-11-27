@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(ldlidar_component)
 
+## Generate symbols for IDE indexer
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
   set(CMAKE_C_STANDARD 99)
@@ -16,21 +19,21 @@ endif()
 #endif()
 
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
-IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Release)
-ENDIF(NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Release )
+if(CMAKE_BUILD_TYPE MATCHES Release)
     #message(" * Release Mode")
     add_compile_options(-Wno-deprecated-declarations)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo )
+if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     #message(" * Release with Debug Info Mode")
     add_compile_options(-Wno-deprecated-declarations)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug )
+if(CMAKE_BUILD_TYPE MATCHES Debug)
     message(" * Debug Mode")
 endif()
 
@@ -60,7 +63,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 
-find_package(udev REQUIRED)
+find_package(UDEV REQUIRED)
 
 # create ament index resource which references the libraries in the binary dir
 set(node_plugins "")
@@ -68,7 +71,7 @@ set(node_plugins "")
 ###############################################################################
 #Add all files in subdirectories of the project in
 # a dummy_target so qtcreator have access to all files
-FILE(GLOB_RECURSE all_files ${CMAKE_SOURCE_DIR}/*)
+file(GLOB_RECURSE all_files ${CMAKE_SOURCE_DIR}/*)
 add_custom_target(all_${PROJECT_NAME}_files SOURCES ${all_files})
 
 
@@ -106,13 +109,13 @@ set(LIDAR_DRIVER_SRC
 ###############################################################################
 # Bin and Install
 
-add_library(${PROJECT_NAME} SHARED    
+add_library(${PROJECT_NAME} SHARED
     ${TOOLS_INC}
     ${TOOLS_SRC}
     ${COMPONENT_INC}
     ${COMPONENT_SRC}
     ${LIDAR_DRIVER_INC}
-    ${LIDAR_DRIVER_SRC}    
+    ${LIDAR_DRIVER_SRC}
 )
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -143,7 +146,7 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # Install header files
-install(DIRECTORY 
+install(DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/component/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/

@@ -1,11 +1,11 @@
 //  Copyright 2022 Walter Lucetti
-
+//
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
-
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-
+//
 //  Unless required by applicable law or agreed to in writing, software
 //  distributed under the License is distributed on an "AS IS" BASIS,
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,17 +13,23 @@
 //  limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __LIPKG_H
-#define __LIPKG_H
+#ifndef LIPKG_HPP_
+#define LIPKG_HPP_
+
 #include <stdint.h>
 
+#include <vector>
 #include <array>
+#include <utility>
+#include <memory>
+#include <string>
 #include <iostream>
+
 #include <rclcpp/clock.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
-#include <vector>
 
-#define ANGLE_TO_RADIAN(angle) ((angle)*M_PI / 180.)
+
+#define ANGLE_TO_RADIAN(angle) ((angle) * M_PI / 180.)
 
 namespace ldlidar
 {
@@ -70,9 +76,10 @@ struct PointData
   PointData()
   {
   }
-  friend std::ostream& operator<<(std::ostream& os, const PointData& data)
+  friend std::ostream & operator<<(std::ostream & os, const PointData & data)
   {
-    os << data.angle << " " << data.distance << " " << (int)data.confidence << " " << data.x << " " << data.y;
+    os << data.angle << " " << data.distance << " " << static_cast<int>(data.confidence) << " "
+       << data.x << " " << data.y;
     return os;
   }
 };
@@ -101,9 +108,10 @@ enum class ROTATION
 class LiPkg
 {
 public:
-public:
-  LiPkg(rclcpp::Clock::SharedPtr clock, UNITS unit = UNITS::METERS, ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE,
-        std::string lidarFrame = "ldlidar_link");
+  LiPkg(
+    rclcpp::Clock::SharedPtr clock, UNITS unit = UNITS::METERS,
+    ROTATION rotVerse = ROTATION::COUNTERCLOCKWISE,
+    std::string lidarFrame = "ldlidar_link");
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)
   {
@@ -121,12 +129,12 @@ public:
   {
     mFrameReady = false;
   }
-  long GetErrorTimes(void)
+  int32_t GetErrorTimes(void)
   {
     return mErrorTimes;
   } /*the number of errors in parser process of lidar data frame*/
-  const std::array<PointData, POINT_PER_PACK>& GetPkgData(void); /*original data package*/
-  bool Parse(const uint8_t* data, long len);                     /*parse single packet*/
+  const std::array<PointData, POINT_PER_PACK> & GetPkgData(void); /*original data package*/
+  bool Parse(const uint8_t * data, int32_t len);                     /*parse single packet*/
   bool AssemblePacket(); /*combine stantard data into data frames and calibrate*/
   std::unique_ptr<sensor_msgs::msg::LaserScan> GetLaserScan()
   {
@@ -140,7 +148,7 @@ private:
   uint16_t mTimestamp;
   double mSpeed;
   std::vector<uint8_t> mDataTmp;
-  long mErrorTimes;
+  int32_t mErrorTimes;
   std::array<PointData, POINT_PER_PACK> mOnePkg;
   std::vector<PointData> mFrameTmp;
   bool mIsPkgReady;
@@ -154,6 +162,7 @@ private:
   std::string mLidarFrame = "ldlidar_link";
   // <---- Parameters
 };
+
 }  // namespace ldlidar
-#endif
-/********************* (C) COPYRIGHT LD Robot *******END OF FILE ********/
+
+#endif  // LIPKG_HPP_

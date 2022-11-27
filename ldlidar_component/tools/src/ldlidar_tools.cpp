@@ -1,11 +1,11 @@
 //  Copyright 2022 Walter Lucetti
-
+//
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
-
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-
+//
 //  Unless required by applicable law or agreed to in writing, software
 //  distributed under the License is distributed on an "AS IS" BASIS,
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,7 @@ namespace tools
 {
 std::string qos2str(rmw_qos_history_policy_t qos)
 {
-  switch (qos)
-  {
+  switch (qos) {
     case RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT:
       return "RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT";
 
@@ -36,8 +35,7 @@ std::string qos2str(rmw_qos_history_policy_t qos)
 
 std::string qos2str(rmw_qos_reliability_policy_t qos)
 {
-  switch (qos)
-  {
+  switch (qos) {
     case RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT:
       return "RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT";
 
@@ -53,8 +51,7 @@ std::string qos2str(rmw_qos_reliability_policy_t qos)
 
 std::string qos2str(rmw_qos_durability_policy_t qos)
 {
-  switch (qos)
-  {
+  switch (qos) {
     case RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT:
       return "RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT";
 
@@ -70,8 +67,7 @@ std::string qos2str(rmw_qos_durability_policy_t qos)
 
 std::string to_string(ldlidar::UNITS val)
 {
-  switch (val)
-  {
+  switch (val) {
     case ldlidar::UNITS::MILLIMETERS:
       return "MILLIMETERS";
 
@@ -87,8 +83,7 @@ std::string to_string(ldlidar::UNITS val)
 
 std::string to_string(ldlidar::ROTATION val)
 {
-  switch (val)
-  {
+  switch (val) {
     case ldlidar::ROTATION::CLOCKWISE:
       return "CLOCKWISE";
 

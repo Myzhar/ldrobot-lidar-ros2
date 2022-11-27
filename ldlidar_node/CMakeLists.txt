@@ -16,21 +16,21 @@ endif()
 #endif()
 
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
-IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Release)
-ENDIF(NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Release )
+if(CMAKE_BUILD_TYPE MATCHES Release)
     #message(" * Release Mode")
     add_compile_options(-Wno-deprecated-declarations)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo )
+if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     #message(" * Release with Debug Info Mode")
     add_compile_options(-Wno-deprecated-declarations)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug )
+if(CMAKE_BUILD_TYPE MATCHES Debug)
     message(" * Debug Mode")
 endif()
 
@@ -60,7 +60,7 @@ set(CONTAINER_SRC
 ###############################################################################
 # Bin and Install
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
   ${CONTAINER_SRC}
 )
 ament_target_dependencies(${PROJECT_NAME}
