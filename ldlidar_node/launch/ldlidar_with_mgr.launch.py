@@ -36,7 +36,7 @@ def generate_launch_description():
     # Lifecycle manager configuration file
     lc_mgr_config_path = os.path.join(
         get_package_share_directory('ldlidar_node'),
-        'config',
+        'params',
         'lifecycle_mgr.yaml'
     )
 

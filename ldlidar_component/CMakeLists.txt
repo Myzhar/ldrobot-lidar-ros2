@@ -87,18 +87,20 @@ set(DEPENDENCIES
     sensor_msgs
     diagnostic_msgs
     diagnostic_updater
+    nav2_util
+    nav2_msgs
 )
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
-find_package(lifecycle_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(nav2_util REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
-find_package(nav2_util REQUIRED)
 
 find_package(UDEV REQUIRED)
 

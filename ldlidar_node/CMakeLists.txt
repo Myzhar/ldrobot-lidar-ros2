@@ -112,6 +112,12 @@ install(TARGETS ${PROJECT_NAME}
 
 # Install PARAMS files
 install(DIRECTORY
+  params
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Install RVIZ files
+install(DIRECTORY
   config
   DESTINATION share/${PROJECT_NAME}
 )
