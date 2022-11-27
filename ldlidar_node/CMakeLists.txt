@@ -21,18 +21,54 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    #message(" * Release Mode")
+    message(STATUS " * Release Mode")
     add_compile_options(-Wno-deprecated-declarations)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    #message(" * Release with Debug Info Mode")
+    message(STATUS " * Release with Debug Info Mode")
     add_compile_options(-Wno-deprecated-declarations)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    message(" * Debug Mode")
+    message(STATUS " * Debug Mode")
 endif()
+
+################################################
+# Check the ROS2 version
+
+set(ROS2_FOUND FALSE)
+if(DEFINED ENV{ROS_DISTRO})
+  set(FOUND_ROS2_DISTRO $ENV{ROS_DISTRO})
+  set(ROS2_FOUND TRUE)
+  message(STATUS "* Found ROS2 ${FOUND_ROS2_DISTRO}")
+else()
+  message(WARNING "* ROS2 distro variable not set. Trying to figure it out...")
+  set(ROS2_DISTROS "ardent;crystal;dashing;eloquent;foxy;galactic;humble;rolling")
+  set(ROS2_FOUND FALSE)
+  foreach(distro ${ROS2_DISTROS})
+    if(NOT ROS2_FOUND)
+      find_path(RCLCPP_H rclcpp.hpp PATHS /opt/ros/${distro}/include/rclcpp)
+      if(RCLCPP_H)
+        message(STATUS "* Found ROS2 ${distro}")
+        set(FOUND_ROS2_DISTRO ${distro})
+        set(ROS2_FOUND TRUE)
+      endif()
+    endif()
+  endforeach()
+endif()
+
+if(ROS2_FOUND)
+  if(${FOUND_ROS2_DISTRO} STREQUAL "humble")
+    message(STATUS "* ROS2 ${FOUND_ROS2_DISTRO} is officially supported by this package.")
+    add_definitions(-DFOUND_HUMBLE)
+  else()
+    message(FATAL_ERROR "ROS2 ${FOUND_ROS2_DISTRO} is not officially supported by this package. Correct working is not guarantee.")
+  endif()
+else()
+  message(FATAL_ERROR "*** WARNING *** ROS2 distro is unknown. This package could not work correctly.")
+endif()
+################################################
 
 #############################################
 # Dependencies
@@ -49,6 +85,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(rcutils REQUIRED)
+find_package(nav2_util REQUIRED)
 find_package(ldlidar_component REQUIRED)
 
 ###############################################################################
