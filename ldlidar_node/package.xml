@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>ldlidar_node</name>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <description>Package the container executable for the ldlidar_component.</description>
   
   <maintainer email="walter.lucetti@myzhar.com">Walter Lucetti</maintainer>
