@@ -2,9 +2,11 @@
   ldrobot-lidar-ros2
 </h1>
 
-<h4 align="center">ROS2 package for LDRobot lidar. Based on Nav2 Lifecycle nodes
+<h4 align="center">ROS2 package for LDRobot lidar. Based on Nav2 Lifecycle nodes</h4>
 
 <p align="center">
+  <a href="#get-the-lidar">Get the lidar</a> •
+  <a href="#the-node-in-action">YouTube videos</a> •
   <a href="#install-the-node">Install</a> •
   <a href="#start-the-node">Start the Node</a> •
   <a href="#parameters">Parameters</a> •
@@ -12,6 +14,32 @@
   <a href="#integrate-the-node-in-your-robot">Robot integration</a>
 </p>
 <br>
+
+This node is designed to work with the DToF 2D Lidar sensors [LD19](https://www.ldrobot.com/product/en/112) made by [LDRobot](https://www.ldrobot.com/en).
+
+It can work also with the [LD06](https://www.ldrobot.com/product/en/98) model, but no tests have been performed with it. LD06 cannot work outdoor.
+
+LD19             |  LD06
+:-------------------------:|:-------------------------:
+![ld19](https://user-images.githubusercontent.com/3648617/204473718-803d25d9-605a-4eaa-a047-d5d3524eead8.png)  |  ![ld06](https://user-images.githubusercontent.com/3648617/204473720-97f72c31-188e-4f5c-b98b-1033a5afe91e.png)
+
+## Get the lidar
+
+My lidar (LD19) comes from the [LDRobot kickstarter campaing](https://www.kickstarter.com/projects/ldrobot/ld-air-lidar-360-tof-sensor-for-all-robotic-applications) ended in 2021.
+
+LDRobot then created also an [Indiegogo campaign](https://www.indiegogo.com/projects/ld-air-lidar-tof-sensor-for-robotic-applications--3#/) for the LD19.
+
+LDRobot today distributes the Lidar through third-party resellers:
+
+* Waveshare: [LD19](https://www.waveshare.com/wiki/DTOF_LIDAR_LD19)
+* Innomaker: [LD19](https://www.inno-maker.com/product/lidar-ld06/)
+* Other: [Search on Google](https://www.google.com/search?q=ld19+lidar&newwindow=1&sxsrf=ALiCzsb2xd4qTTA78N00mP9-PP5HY4axZw:1669710673586&source=lnms&tbm=shop&sa=X&ved=2ahUKEwjYns78_NL7AhVLVfEDHf2PDk8Q_AUoA3oECAIQBQ&cshid=1669710734415350&biw=1862&bih=882&dpr=1)
+
+## The node in action
+
+LD19 Lifecycle            |  LD19 outdoor
+:-------------------------:|:-------------------------:
+[![LD19 Lifecycle](https://img.youtube.com/vi/mbKwmK3Yjus/mqdefault.jpg)](https://youtu.be/mbKwmK3Yjus) | [![LD19 outdoor](https://img.youtube.com/vi/zyggXjW6cDo/mqdefault.jpg)](https://youtu.be/zyggXjW6cDo)
 
 ## Install the node
 
@@ -117,6 +145,7 @@ Follow the following procedure, to integrate the `ldlidar_node` in a robot confi
 * Include the [`ldlidar.launch.py`](ldlidar_node/launch/ldlidar.launch.py) in the bringup launch file of the robot. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
 * Handle lifecycle to correctly start the node. You can use the Nav2 `lifecycle_manager`, by including it in the bringup launch file. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
 * Enjoy your working system
+
 
 
 
