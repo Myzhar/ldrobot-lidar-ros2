@@ -8,7 +8,7 @@
   <description>LDRobot Lidar ROS2 support meta package</description>
 
   <maintainer email="myzhar@myzhar.com">Myzhar</maintainer>
-  <license>MIT</license>
+  <license>Apache License 2.0</license>
 
   <url type="website">https://myzhar.com/</url>
   <url type="repository">https://github.com/Myzhar/ldrobot-lidar-ros2</url>
