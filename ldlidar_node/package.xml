@@ -6,7 +6,7 @@
   <description>Package the container executable for the ldlidar_component.</description>
   
   <maintainer email="walter.lucetti@myzhar.com">Walter Lucetti</maintainer>
-  <license>Apache-2</license>
+  <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
