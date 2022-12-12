@@ -6,7 +6,7 @@
   <description>Package containing driver for LDRobot 2D DToF lidars. Based on ROS2 lifecycle concepts.</description>
   
   <maintainer email="walter.lucetti@myzhar.com">Walter Lucetti</maintainer>
-  <license>Apache-2</license>
+  <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
