@@ -56,7 +56,7 @@ Add dependencies:
 
 Install the udev rules
 
-    cd ~/ros2_ws/src/ldrobot-lidar-ros2/scripts/ù
+    cd ~/ros2_ws/src/ldrobot-lidar-ros2/scripts/
     ./create_udev_rules.sh
 
 Build the packages:
