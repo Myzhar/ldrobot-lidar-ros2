@@ -61,7 +61,7 @@ Install the udev rules
 
 Build the packages:
 
-    cd ~/ros2_ws/src/
+    cd ~/ros2_ws/
     rosdep install --from-paths src --ignore-src -r -y
     colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
 
