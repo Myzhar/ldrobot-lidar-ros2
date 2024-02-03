@@ -56,12 +56,12 @@ Add dependencies:
 
 Install the udev rules
 
-    cd ~/ros2_ws/src/ldrobot-lidar-ros2/scripts/ù
+    cd ~/ros2_ws/src/ldrobot-lidar-ros2/scripts/
     ./create_udev_rules.sh
 
 Build the packages:
 
-    cd ~/ros2_ws/src/
+    cd ~/ros2_ws/
     rosdep install --from-paths src --ignore-src -r -y
     colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
 
