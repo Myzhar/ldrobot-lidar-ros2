@@ -23,11 +23,7 @@ from launch_ros.actions import Node, LifecycleNode
 
 
 def generate_launch_description():
-
-    # Set LOG format
-    os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '{time} [{severity}] ({name}) {message}'
-    os.environ['RCUTILS_COLORIZED_OUTPUT'] = '1'
-
+    
     node_name = LaunchConfiguration('node_name')
 
     # Lidar node configuration file
