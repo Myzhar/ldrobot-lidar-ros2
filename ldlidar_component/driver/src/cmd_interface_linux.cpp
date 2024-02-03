@@ -29,11 +29,11 @@
 #define MAX_ACK_BUF_LEN 2304000
 
 CmdInterfaceLinux::CmdInterfaceLinux()
-: mRxThread(nullptr),
-  mRxCount(0),
-  mReadCallback(nullptr)
+: _rxThread(nullptr),
+  _rxCount(0),
+  _readCallback(nullptr)
 {
-  mComHandle = -1;
+  _comHandle = -1;
 }
 
 
@@ -47,15 +47,15 @@ bool CmdInterfaceLinux::Open(std::string & port_name)
 {
   int flags = (O_RDWR | O_NOCTTY | O_NONBLOCK);
 
-  mComHandle = open(port_name.c_str(), flags);
-  if (-1 == mComHandle) {
+  _comHandle = open(port_name.c_str(), flags);
+  if (-1 == _comHandle) {
     std::cerr << "CmdInterfaceLinux::Open open error!" << std::endl;
     return false;
   }
 
   // get port options
   struct termios options;
-  if (-1 == tcgetattr(mComHandle, &options)) {
+  if (-1 == tcgetattr(_comHandle, &options)) {
     Close();
     std::cerr << "CmdInterfaceLinux::Open tcgetattr error!" << std::endl;
     return false;
@@ -73,17 +73,17 @@ bool CmdInterfaceLinux::Open(std::string & port_name)
 
   cfsetispeed(&options, B230400);
 
-  if (tcsetattr(mComHandle, TCSANOW, &options) < 0) {
+  if (tcsetattr(_comHandle, TCSANOW, &options) < 0) {
     std::cerr << "CmdInterfaceLinux::Open tcsetattr error!" << std::endl;
     Close();
     return false;
   }
 
-  tcflush(mComHandle, TCIFLUSH);
+  tcflush(_comHandle, TCIFLUSH);
 
-  mRxThreadExitFlag = false;
-  mRxThread = new std::thread(mRxThreadProc, this);
-  mIsCmdOpened = true;
+  _rxThreadExitFlag = false;
+  _rxThread = new std::thread(_rxThreadProc, this);
+  _isCmdOpened = true;
 
   return true;
 }
@@ -91,24 +91,24 @@ bool CmdInterfaceLinux::Open(std::string & port_name)
 
 bool CmdInterfaceLinux::Close()
 {
-  if (mIsCmdOpened == false) {
+  if (_isCmdOpened == false) {
     return true;
   }
 
-  mRxThreadExitFlag = true;
+  _rxThreadExitFlag = true;
 
-  if (mComHandle != -1) {
-    close(mComHandle);
-    mComHandle = -1;
+  if (_comHandle != -1) {
+    close(_comHandle);
+    _comHandle = -1;
   }
 
-  if ((mRxThread != nullptr) && mRxThread->joinable()) {
-    mRxThread->join();
-    delete mRxThread;
-    mRxThread = NULL;
+  if ((_rxThread != nullptr) && _rxThread->joinable()) {
+    _rxThread->join();
+    delete _rxThread;
+    _rxThread = NULL;
   }
 
-  mIsCmdOpened = false;
+  _isCmdOpened = false;
 
   return true;
 }
@@ -162,8 +162,8 @@ bool CmdInterfaceLinux::ReadFromIO(uint8_t * rx_buf, uint32_t rx_buf_len, uint32
   if (IsOpened()) {
     fd_set read_fds;
     FD_ZERO(&read_fds);
-    FD_SET(mComHandle, &read_fds);
-    int r = pselect(mComHandle + 1, &read_fds, NULL, NULL, &timeout, NULL);
+    FD_SET(_comHandle, &read_fds);
+    int r = pselect(_comHandle + 1, &read_fds, NULL, NULL, &timeout, NULL);
     if (r < 0) {
       // Select was interrupted
       if (errno == EINTR) {
@@ -173,8 +173,8 @@ bool CmdInterfaceLinux::ReadFromIO(uint8_t * rx_buf, uint32_t rx_buf_len, uint32
       return false;
     }
 
-    if (FD_ISSET(mComHandle, &read_fds)) {
-      len = (int32_t)read(mComHandle, rx_buf, rx_buf_len);
+    if (FD_ISSET(_comHandle, &read_fds)) {
+      len = (int32_t)read(_comHandle, rx_buf, rx_buf_len);
       if ((len != -1) && rx_len) {
         *rx_len = len;
       }
@@ -189,7 +189,7 @@ bool CmdInterfaceLinux::WriteToIo(const uint8_t * tx_buf, uint32_t tx_buf_len, u
   int32_t len = -1;
 
   if (IsOpened()) {
-    len = (int32_t)write(mComHandle, tx_buf, tx_buf_len);
+    len = (int32_t)write(_comHandle, tx_buf, tx_buf_len);
     if ((len != -1) && tx_len) {
       *tx_len = len;
     }
@@ -198,17 +198,17 @@ bool CmdInterfaceLinux::WriteToIo(const uint8_t * tx_buf, uint32_t tx_buf_len, u
 }
 
 
-void CmdInterfaceLinux::mRxThreadProc(void * param)
+void CmdInterfaceLinux::_rxThreadProc(void * param)
 {
   CmdInterfaceLinux * cmd_if = reinterpret_cast<CmdInterfaceLinux *>(param);
   char * rx_buf = new char[MAX_ACK_BUF_LEN + 1];
-  while (!cmd_if->mRxThreadExitFlag.load()) {
+  while (!cmd_if->_rxThreadExitFlag.load()) {
     uint32_t readed = 0;
     bool res = cmd_if->ReadFromIO(reinterpret_cast<uint8_t *>(rx_buf), MAX_ACK_BUF_LEN, &readed);
     if (res && readed) {
-      cmd_if->mRxCount += readed;
-      if (cmd_if->mReadCallback != nullptr) {
-        cmd_if->mReadCallback(rx_buf, readed);
+      cmd_if->_rxCount += readed;
+      if (cmd_if->_readCallback != nullptr) {
+        cmd_if->_readCallback(rx_buf, readed);
       }
     }
   }

@@ -124,43 +124,39 @@ protected:
 
 private:
   // ----> Parameters
-  bool mDebugMode = true;
-  bool mUseDirectSerial = false;  // Set to true if using a direct uart connection
-  std::string mSerialPort;        // Serial port to use when @ref mUseDirectSerial is true
+  bool _debugMode = true;
+  bool _useDirectSerial = false;  // Set to true if using a direct uart connection
+  std::string _serialPort;        // Serial port to use when @ref _useDirectSerial is true
 
-  UNITS mUnits = UNITS::METERS;
-  ROTATION mRotVerse = ROTATION::CLOCKWISE;
-  std::string mFrameId = "ldlidar_link";
+  UNITS _units = UNITS::METERS;
+  ROTATION _rotVerse = ROTATION::CLOCKWISE;
+  std::string _frameId = "ldlidar_link";
   // <---- Parameters
 
   // Publisher
-  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::LaserScan>> mScanPub;
+  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::LaserScan>> _scanPub;
 
   // ----> Topics
-  std::string mTopicRoot = "~/";
-  std::string mScanTopic = "scan";
+  std::string _topicRoot = "~/";
+  std::string _scanTopic = "scan";
   // <---- Topics
 
-  // ----> QoS
-  rclcpp::SensorDataQoS mLidarQos;
-  // <---- QoS
-
   // Diagnostic updater
-  diagnostic_updater::Updater mDiagUpdater;
+  diagnostic_updater::Updater _diagUpdater;
 
   // Lidar
-  std::unique_ptr<LiPkg> mLidar;
+  std::unique_ptr<LiPkg> _lidar;
 
   // Lidar communication
-  std::unique_ptr<CmdInterfaceLinux> mLidarComm;
+  std::unique_ptr<CmdInterfaceLinux> _lidarComm;
 
   // Lidar Thread
-  std::thread mLidarThread;
-  bool mThreadStop = false;
+  std::thread _lidarThread;
+  bool _threadStop = false;
 
   // Diagnostic
-  double mPubFreq;
-  bool mPublishing;
+  double _pubFreq;
+  bool _publishing;
 };
 
 }  // namespace ldlidar

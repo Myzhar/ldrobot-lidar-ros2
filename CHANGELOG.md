@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+2024-02-03
+----------
+* Add support for QoS override parameters -> https://design.ros2.org/articles/qos_configurability.html#adding-a-new-mechanism-vs-using-parameters
+
 2022-11-27
 ----------
 * Add direct serial port connection feature

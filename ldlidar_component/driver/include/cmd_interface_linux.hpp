@@ -41,17 +41,17 @@ public:
   bool GetCmdDevices(std::vector<std::pair<std::string, std::string>> & device_list);
   void SetReadCallback(std::function<void(const char *, size_t length)> callback)
   {
-    mReadCallback = callback;
+    _readCallback = callback;
   }
-  bool IsOpened() {return mIsCmdOpened.load();}
+  bool IsOpened() {return _isCmdOpened.load();}
 
 private:
-  std::thread * mRxThread;
-  static void mRxThreadProc(void * param);
-  int64_t mRxCount;
-  int32_t mComHandle;
-  std::atomic<bool> mIsCmdOpened, mRxThreadExitFlag;
-  std::function<void(const char *, size_t length)> mReadCallback;
+  std::thread * _rxThread;
+  static void _rxThreadProc(void * param);
+  int64_t _rxCount;
+  int32_t _comHandle;
+  std::atomic<bool> _isCmdOpened, _rxThreadExitFlag;
+  std::function<void(const char *, size_t length)> _readCallback;
 };
 
 #endif  // CMD_INTERFACE_LINUX_HPP_

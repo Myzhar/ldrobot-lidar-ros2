@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(ldlidar_component)
 
-## Generate symbols for IDE indexer
+################################################
+## Generate symbols for IDE indexer (VSCode)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default to C99

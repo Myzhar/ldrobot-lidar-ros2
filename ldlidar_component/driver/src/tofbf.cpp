@@ -32,7 +32,7 @@ namespace ldlidar
 */
 Tofbf::Tofbf(int speed)
 {
-  curr_speed = speed;
+  _curr_speed = speed;
 }
 
 Tofbf::~Tofbf()
@@ -64,7 +64,7 @@ std::vector<PointData> Tofbf::NearFilter(const std::vector<PointData> & tmp) con
     return normal;
   }
 
-  double angle_delta_up_limit = curr_speed / SCAN_FRE * 2;
+  double angle_delta_up_limit = _curr_speed / SCAN_FRE * 2;
 
   // std::cout <<angle_delta_up_limit << std::endl; test code
 

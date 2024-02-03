@@ -115,51 +115,51 @@ public:
   double GetSpeed(void); /*Lidar spin speed (Hz)*/
   uint16_t GetTimestamp(void)
   {
-    return mTimestamp;
+    return _timestamp;
   } /*time stamp of the packet */
   bool IsPkgReady(void)
   {
-    return mIsPkgReady;
+    return _isPkgReady;
   } /*a packet is ready */
   bool IsFrameReady(void)
   {
-    return mFrameReady;
+    return _frameReady;
   } /*Lidar data frame is ready*/
   void ResetFrameReady(void)
   {
-    mFrameReady = false;
+    _frameReady = false;
   }
   int32_t GetErrorTimes(void)
   {
-    return mErrorTimes;
+    return _errorTimes;
   } /*the number of errors in parser process of lidar data frame*/
   const std::array<PointData, POINT_PER_PACK> & GetPkgData(void); /*original data package*/
   bool Parse(const uint8_t * data, int32_t len);                     /*parse single packet*/
   bool AssemblePacket(); /*combine stantard data into data frames and calibrate*/
   std::unique_ptr<sensor_msgs::msg::LaserScan> GetLaserScan()
   {
-    return std::move(mOutScan);
+    return std::move(_outScan);
   }
 
 protected:
   void ToLaserscan(std::vector<PointData> src);
 
 private:
-  uint16_t mTimestamp;
-  double mSpeed;
-  std::vector<uint8_t> mDataTmp;
-  int32_t mErrorTimes;
-  std::array<PointData, POINT_PER_PACK> mOnePkg;
-  std::vector<PointData> mFrameTmp;
-  bool mIsPkgReady;
-  bool mFrameReady;
-  std::unique_ptr<sensor_msgs::msg::LaserScan> mOutScan;
-  rclcpp::Clock::SharedPtr mClock;
+  uint16_t _timestamp;
+  double _speed;
+  std::vector<uint8_t> _dataTmp;
+  int32_t _errorTimes;
+  std::array<PointData, POINT_PER_PACK> _onePkg;
+  std::vector<PointData> _frameTmp;
+  bool _isPkgReady;
+  bool _frameReady;
+  std::unique_ptr<sensor_msgs::msg::LaserScan> _outScan;
+  rclcpp::Clock::SharedPtr _clock;
 
   // ----> Parameters
-  double mUnitScale = 1e-3;
-  ROTATION mRotVerse = ROTATION::COUNTERCLOCKWISE;
-  std::string mLidarFrame = "ldlidar_link";
+  double _unitscale = 1e-3;
+  ROTATION _rotVerse = ROTATION::COUNTERCLOCKWISE;
+  std::string _lidarFrame = "ldlidar_link";
   // <---- Parameters
 };
 

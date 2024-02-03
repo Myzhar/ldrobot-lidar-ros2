@@ -32,21 +32,21 @@ static const uint8_t CrcTable[256] = {
 };
 
 LiPkg::LiPkg(UNIT unit, ROTATION rotVerse)
-  : mTimestamp(0), mSpeed(0), mErrorTimes(0), mFrameReady(false), mIsPkgReady(false), mRotVerse(rotVerse)
+  : _timestamp(0), mSpeed(0), _errorTimes(0), mFrameReady(false), mIsPkgReady(false), mRotVerse(rotVerse)
 {
   switch (unit)
   {
 	case MILLIMETER:
-	  mUnitScale = 1.0;
+	  _unitscale = 1.0;
 	  break;
 
 	case CENTIMETER:
-	  mUnitScale = 10.;
+	  _unitscale = 10.;
 	  break;
 
 	default:
 	case METER:
-	  mUnitScale = 1e-3;
+	  _unitscale = 1e-3;
 	  break;
   }
 }
@@ -68,7 +68,7 @@ bool LiPkg::Parse(const uint8_t* data, long len)
 
   if (mDataTmp.size() > sizeof(LiDARFrameTypeDef) * 100)
   {
-	mErrorTimes++;
+	_errorTimes++;
 	mDataTmp.clear();
 	return false;
   }
@@ -94,7 +94,7 @@ bool LiPkg::Parse(const uint8_t* data, long len)
 
 	if (start != 0)
 	{
-	  mErrorTimes++;
+	  _errorTimes++;
 	  for (int i = 0; i < start; i++)
 	  {
 		mDataTmp.erase(mDataTmp.begin());
@@ -117,12 +117,12 @@ bool LiPkg::Parse(const uint8_t* data, long len)
 	  double diff = (pkg->end_angle / 100 - pkg->start_angle / 100 + 360) % 360;
 	  if (diff > (double)pkg->speed * POINT_PER_PACK / 4500 * 3 / 2)
 	  {
-		mErrorTimes++;
+		_errorTimes++;
 	  }
 	  else
 	  {
 		mSpeed = pkg->speed;
-		mTimestamp = pkg->timestamp;
+		_timestamp = pkg->timestamp;
 		uint32_t diff = ((uint32_t)pkg->end_angle + 36000 - (uint32_t)pkg->start_angle) % 36000;
 		float step = diff / (POINT_PER_PACK - 1) / 100.0;
 		float start = (double)pkg->start_angle / 100.0;
@@ -137,11 +137,11 @@ bool LiPkg::Parse(const uint8_t* data, long len)
 			data.angle -= 360.0;
 		  }
 		  data.confidence = pkg->point[i].confidence;
-		  mOnePkg[i] = data;
+		  _onePkg[i] = data;
 		  mFrameTmp.push_back(PointData(data.angle, data.distance, data.confidence));
 		}
 		// prevent angle invert
-		mOnePkg.back().angle = end;
+		_onePkg.back().angle = end;
 
 		mIsPkgReady = true;
 	  }
@@ -158,7 +158,7 @@ bool LiPkg::Parse(const uint8_t* data, long len)
 	}
 	else
 	{
-	  mErrorTimes++;
+	  _errorTimes++;
 	  /*only remove header,not all frame,because lidar data may contain head*/
 	  for (int i = 0; i < 2; i++)
 	  {
@@ -210,7 +210,7 @@ bool LiPkg::AssemblePacket()
 const std::array<PointData, POINT_PER_PACK>& LiPkg::GetPkgData(void)
 {
   mIsPkgReady = false;
-  return mOnePkg;
+  return _onePkg;
 }
 
 void LiPkg::ToLaserscan(std::vector<PointData> src)
@@ -242,7 +242,7 @@ void LiPkg::ToLaserscan(std::vector<PointData> src)
 
   for (auto point : src)
   {
-	float range = point.distance * mUnitScale;
+	float range = point.distance * _unitscale;
 
 	float angle;
 	switch (mRotVerse)
