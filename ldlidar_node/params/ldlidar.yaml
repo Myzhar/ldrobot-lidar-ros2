@@ -8,10 +8,12 @@
       debug_mode: true # true to activate debug messages
 
     comm:
-      direct_serial: false # false to use usb to serial converter
-      serial_port: "/dev/ldlidar" # serial port name if `direct-serial` is true
+      serial_port: '/dev/ldlidar' # serial port name
+      baudrate: 230400 #serial baudrate
 
     lidar:
-      frame_id: "ldlidar_link" # TF frame name for the lidar
-      rot_verse: 1 # 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
-      units: 2 # 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+      model: 'LDLiDAR_LD19' # Model type: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
+      frame_id: 'ldlidar_link' # TF frame name for the lidar
+
+      #rot_verse: 1 # 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
+      #units: 2 # 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]

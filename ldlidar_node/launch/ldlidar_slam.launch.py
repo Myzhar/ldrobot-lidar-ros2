@@ -66,8 +66,7 @@ def generate_launch_description():
           ],
           remappings=[
               ('/scan', '/ldlidar_node/scan')
-          ]
-          
+          ]          
     )
 
     # Include LDLidar launch

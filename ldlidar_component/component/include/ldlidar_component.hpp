@@ -33,8 +33,7 @@
 #include <nav2_util/lifecycle_node.hpp>
 
 #include "visibility_control.hpp"
-#include "cmd_interface_linux.hpp"
-#include "lipkg.hpp"
+#include "ldlidar_driver.h"
 
 namespace lc = rclcpp_lifecycle;
 
@@ -118,18 +117,23 @@ protected:
   void startLidarThread();
   void stopLidarThread();
   void lidarThreadFunc();
-  void lidarReadCallback(const char * byte, size_t len);
 
-  void publishLaserScan();
+  void publishLaserScan(ldlidar::Points2D & src, double lidar_spin_freq);
 
 private:
   // ----> Parameters
   bool _debugMode = true;
-  bool _useDirectSerial = false;  // Set to true if using a direct uart connection
-  std::string _serialPort;        // Serial port to use when @ref _useDirectSerial is true
+  std::string _lidarModel;        // Lidar Model: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
+  std::string _serialPort;        // Serial port name
+  int _baudrate = 230400;     // Serial baudrate
+  bool _counterlockwise = true;   // TODO ADD NODE PARAMETER
+  int _readTimeOut_msec = 1500;   // TODO ADD NODE PARAMETER
+  bool _enableAngleCrop = false;  // TODO ADD NODE PARAMETER
+  double _angleCropMin = 0;       // TODO ADD NODE PARAMETER
+  double _angleCropMax = 180;     // TODO ADD NODE PARAMETER
 
-  UNITS _units = UNITS::METERS;
-  ROTATION _rotVerse = ROTATION::CLOCKWISE;
+  //UNITS _units = UNITS::METERS;
+  //ROTATION _rotVerse = ROTATION::CLOCKWISE;
   std::string _frameId = "ldlidar_link";
   // <---- Parameters
 
@@ -144,11 +148,9 @@ private:
   // Diagnostic updater
   diagnostic_updater::Updater _diagUpdater;
 
-  // Lidar
-  std::unique_ptr<LiPkg> _lidar;
-
   // Lidar communication
-  std::unique_ptr<CmdInterfaceLinux> _lidarComm;
+  std::unique_ptr<ldlidar::LDLidarDriver> _lidar;
+  ldlidar::LDType _lidarType;
 
   // Lidar Thread
   std::thread _lidarThread;
