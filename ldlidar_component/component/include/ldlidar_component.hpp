@@ -33,6 +33,7 @@
 #include <nav2_util/lifecycle_node.hpp>
 
 #include "visibility_control.hpp"
+#include "defines.hpp"
 #include "ldlidar_driver.h"
 
 namespace lc = rclcpp_lifecycle;
@@ -125,17 +126,20 @@ private:
   bool _debugMode = true;
   std::string _lidarModel;        // Lidar Model: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
   std::string _serialPort;        // Serial port name
-  int _baudrate = 230400;     // Serial baudrate
-  bool _counterlockwise = true;   // TODO ADD NODE PARAMETER
-  int _readTimeOut_msec = 1500;   // TODO ADD NODE PARAMETER
+  int _baudrate = 230400;         // Serial baudrate
+  int _readTimeOut_msec = 1500;   // Serial read timeout in msec
+  bool _counterclockwise = true;  // Rotation verse
   bool _enableAngleCrop = false;  // TODO ADD NODE PARAMETER
   double _angleCropMin = 0;       // TODO ADD NODE PARAMETER
   double _angleCropMax = 180;     // TODO ADD NODE PARAMETER
-
-  //UNITS _units = UNITS::METERS;
-  //ROTATION _rotVerse = ROTATION::CLOCKWISE;
+  int _bins = 455;                // TODO ADD NODE PARAMETER
+  double _rangeMin = 0.03;        // TODO ADD NODE PARAMETER
+  double _rangeMax = 25.0;        // TODO ADD NODE PARAMETER
   std::string _frameId = "ldlidar_link";
   // <---- Parameters
+
+  // Processing
+  float _distScale = 0.001; // Scale factor to match the units setting
 
   // Publisher
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::LaserScan>> _scanPub;

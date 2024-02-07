@@ -99,8 +99,12 @@ void LdLidarComponent::getCommParams()
 
   // ----> Communication
   getParam(
-    "comm.serial_port", _serialPort, _serialPort, "Serial port name", true,
+    "comm.serial_port", _serialPort, _serialPort, "Communication serial port path", true,
     " * Serial port: ");
+
+  getParam(
+    "comm.timeout_msec", _readTimeOut_msec, _readTimeOut_msec, "Data reading timeout in msec",
+    false, " * Timeout [msec]: ");
   // <---- Communication
 }
 
@@ -123,21 +127,41 @@ void LdLidarComponent::getLidarParams()
     exit(EXIT_FAILURE);
   }
 
-  getParam("lidar.frame_id", _frameId, _frameId, " * Lidar frame: ", "Name of the lidar frame");
+  getParam(
+    "lidar.frame_id", _frameId, _frameId, "Name of the lidar frame", true,
+    " * Lidar frame: ");
 
-  // int rotVerse = static_cast<int>(_rotVerse);
-  // limits_int = {0, static_cast<int>(ROTATION::COUNTERCLOCKWISE), 1};
-  // getParam(
-  //   "lidar.rot_verse", rotVerse, rotVerse, limits_int,
-  //   "Change rotation verse. To be used if the lidar is mounted upside down.", true);
-  // _rotVerse = static_cast<ROTATION>(rotVerse);
-  // RCLCPP_INFO_STREAM(get_logger(), " * Rotation verse: " << tools::to_string(_rotVerse));
+  std::string units_str = "M";
+  getParam("lidar.units", units_str, units_str, "Measure units", true, " * Units: ");
 
-  // limits_int = {0, static_cast<int>(UNITS::METERS), 1};
-  // int units = static_cast<int>(_units);
-  // getParam("lidar.units", units, units, limits_int, "Set measurement units");
-  // _units = static_cast<UNITS>(units);
-  // RCLCPP_INFO_STREAM(get_logger(), " * Measure units: " << tools::to_string(_units));
+  if (units_str == "MM") {
+    _distScale = 1.0f;
+  } else if (units_str == "CM") {
+    _distScale = 0.1f;
+  } else {
+    if (units_str != "M") {
+      RCLCPP_WARN(get_logger(), "Parameter 'lidar.units' not valid, using the default value: 'M'");
+    }
+    _distScale = 0.001f;
+  }
+
+  std::string rot_verse = "CCW";
+  getParam(
+    "lidar.rot_verse", rot_verse, rot_verse, " * Rotation verse: ",
+    "Rotation verse, use 'CW' if upsidedown");
+  if (rot_verse == "CW") {
+    _counterclockwise = false;
+  } else {
+    if (rot_verse != "CCW") {
+      RCLCPP_WARN(
+        get_logger(), "Parameter 'lidar.rot_verse' not valid, using the default value: 'CCW'");
+    }
+    _counterclockwise = true;
+  }
+
+  getParam(
+    "lidar.bins", _bins, _bins, "Fixed number of data beams. 0 for dynamic", true,
+    " * Bins: ");
   // <---- Lidar config
 }
 
@@ -344,23 +368,20 @@ nav2_util::CallbackReturn LdLidarComponent::on_error(const lc::State & prev_stat
 
 void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_spin_freq)
 {
-  static size_t count = 0;
-
-  // Print the current state for demo purposes
-  if (!_scanPub->is_activated()) {
-    auto & clk = *this->get_clock();
-    RCLCPP_INFO_THROTTLE(
-      get_logger(), clk, 5000,
-      "Lifecycle publisher is currently inactive. Messages "
-      "are not published.");
-    return;
-  }
-
-  float angle_min, angle_max, range_min, range_max, angle_increment;
+  float angle_min, angle_max, angle_increment;
   double scan_time;
   rclcpp::Time start_scan_time;
   static rclcpp::Time end_scan_time;
   static bool first_scan = true;
+
+  int beam_size = 0;
+
+  // With a fixed number of bins the compatibility with SlamToolbox is guaranteed
+  if (_bins > 0) {
+    beam_size = _bins;
+  } else {
+    beam_size = static_cast<int>(src.size());
+  }
 
   start_scan_time = this->now();
   scan_time = (start_scan_time.seconds() - end_scan_time.seconds());
@@ -370,26 +391,20 @@ void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_sp
     end_scan_time = start_scan_time;
     return;
   }
-
   // Adjust the parameters according to the demand
   angle_min = 0;
   angle_max = (2 * M_PI);
-  range_min = 0.02;
-  range_max = 25;
-  int beam_size = static_cast<int>(src.size());
   angle_increment = (angle_max - angle_min) / (float)(beam_size - 1);
-
   // Calculate the number of scanning points
   if (lidar_spin_freq > 0) {
     std::unique_ptr<sensor_msgs::msg::LaserScan> msg =
       std::make_unique<sensor_msgs::msg::LaserScan>();
-
     msg->header.stamp = start_scan_time;
     msg->header.frame_id = _frameId;
     msg->angle_min = angle_min;
     msg->angle_max = angle_max;
-    msg->range_min = range_min;
-    msg->range_max = range_max;
+    msg->range_min = _rangeMin;
+    msg->range_max = _rangeMax;
     msg->angle_increment = angle_increment;
     if (beam_size <= 1) {
       msg->time_increment = 0;
@@ -401,7 +416,7 @@ void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_sp
     msg->ranges.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
     msg->intensities.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
     for (auto point : src) {
-      float range = point.distance / 1000.f;  // distance unit transform to meters
+      float range = point.distance * _distScale;  // distance unit transform to meters
       float intensity = point.intensity;      // laser receive intensity
       float dir_angle = point.angle;
 
@@ -426,7 +441,7 @@ void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_sp
             index, beam_size, angle, angle_min, angle_increment);
         }
 
-        if (_counterlockwise) {
+        if (_counterclockwise) {
           int index_anticlockwise = beam_size - index - 1;
           // If the current content is Nan, it is assigned directly
           if (std::isnan(msg->ranges[index_anticlockwise])) {

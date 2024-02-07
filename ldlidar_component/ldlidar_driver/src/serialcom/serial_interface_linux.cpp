@@ -99,7 +99,7 @@ bool SerialInterfaceLinux::Open(std::string & port_name, uint32_t com_baudrate)
     return false;
   }
 
-  LDS_LOG_INFO("Actual BaudRate reported:%d", options.c_ospeed);
+  //LDS_LOG_INFO("Actual BaudRate reported:%d", options.c_ospeed);
 
   tcflush(com_handle_, TCIFLUSH);
 
