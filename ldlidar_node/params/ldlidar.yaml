@@ -13,7 +13,7 @@
       timeout_msec: 1000 # data communication timeout in msec
 
     lidar:
-      model: 'LDLiDAR_LD19' # Model type: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L      
+      model: 'LDLiDAR_LD19' # Model type: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
       rot_verse: 'CCW' # 'CW' -> `CLOCKWISE` / 'CCW' -> `COUNTERCLOCKWISE` [ROS STANDARD]
       units: 'M' # 'MM' -> `MILLIMETERS` / 'CM' -> `CENTIMETERS` / 'M' -> `METERS` [ROS STANDARD]
       frame_id: 'ldlidar_link' # TF frame name for the lidar
