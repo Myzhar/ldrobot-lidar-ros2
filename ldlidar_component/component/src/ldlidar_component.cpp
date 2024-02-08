@@ -39,7 +39,7 @@ LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions & options)
   RCLCPP_INFO(get_logger(), "****************************************");
   RCLCPP_INFO(
     get_logger(),
-    "State: 'unconfigured [1]'. Use lifecycle commands "
+    " + State: 'unconfigured [1]'. Use lifecycle commands "
     "to configure [1] or shutdown [5]");
 
   // ----> Diagnostic
@@ -162,6 +162,21 @@ void LdLidarComponent::getLidarParams()
   getParam(
     "lidar.bins", _bins, _bins, "Fixed number of data beams. 0 for dynamic", true,
     " * Bins: ");
+  getParam(
+    "lidar.range_min", _rangeMin, _rangeMin, "Minimum distance in units", false,
+    " * Minimum distance: ");
+  getParam(
+    "lidar.range_max", _rangeMax, _rangeMax, "Maximum distance in units", false,
+    " * Minimum distance: ");
+  getParam(
+    "lidar.enable_angle_crop", _enableAngleCrop, _enableAngleCrop, "Angle cropping", false,
+    " * Angle cropping: ");
+  getParam(
+    "lidar.angle_crop_min", _angleCropMin, _angleCropMin, "Angle cropping minimum angle",
+    false, " * Angle cropping min angle: ");
+  getParam(
+    "lidar.angle_crop_max", _angleCropMax, _angleCropMax, "Angle cropping maximum angle",
+    false, " * Angle cropping max angle: ");
   // <---- Lidar config
 }
 
@@ -277,7 +292,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'inactive [2]'. Use lifecycle commands to "
+    " + State: 'inactive [2]'. Use lifecycle commands to "
     "activate [3], cleanup [2] or shutdown "
     "[6]");
   return nav2_util::CallbackReturn::SUCCESS;
@@ -300,7 +315,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_activate(const lc::State & prev_s
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'active [3]'. Use lifecycle commands to "
+    " + State: 'active [3]'. Use lifecycle commands to "
     "deactivate [4] or shutdown [7]");
   return nav2_util::CallbackReturn::SUCCESS;
 }
@@ -323,7 +338,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_deactivate(const lc::State & prev
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'inactive [2]'. Use lifecycle commands to "
+    " + State: 'inactive [2]'. Use lifecycle commands to "
     "activate [3], cleanup [2] or shutdown "
     "[6]");
   return nav2_util::CallbackReturn::SUCCESS;
@@ -339,7 +354,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_cleanup(const lc::State & prev_st
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'unconfigured [1]'. Use lifecycle commands "
+    " + State: 'unconfigured [1]'. Use lifecycle commands "
     "to configure [1] or shutdown [5]");
   return nav2_util::CallbackReturn::SUCCESS;
 }
@@ -352,7 +367,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_shutdown(const lc::State & prev_s
 
   _scanPub.reset();
 
-  RCLCPP_INFO_STREAM(get_logger(), "State: 'finalized [4]'. Press Ctrl+C to kill...");
+  RCLCPP_INFO_STREAM(get_logger(), " + State: 'finalized [4]'. Press Ctrl+C to kill...");
   return nav2_util::CallbackReturn::SUCCESS;
 }
 
@@ -362,7 +377,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_error(const lc::State & prev_stat
     get_logger(), "on_error: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                << "] -> Finalized");
 
-  RCLCPP_INFO_STREAM(get_logger(), "State: 'finalized [4]'. Press Ctrl+C to kill...");
+  RCLCPP_INFO_STREAM(get_logger(), " + State: 'finalized [4]'. Press Ctrl+C to kill...");
   return nav2_util::CallbackReturn::FAILURE;
 }
 
@@ -489,16 +504,16 @@ bool LdLidarComponent::initLidar()
 bool LdLidarComponent::initLidarComm()
 {
   if (_lidar->Start(_lidarType, _serialPort, _baudrate, ldlidar::COMM_SERIAL_MODE)) {
-    RCLCPP_INFO(get_logger(), "* LDLidar started");
+    RCLCPP_INFO_STREAM(get_logger(), "***** LDLidar opened on port '" << _serialPort << "' *****");
   } else {
-    RCLCPP_ERROR(get_logger(), "!!! LDLidar not started !!!");
+    RCLCPP_ERROR(get_logger(), "!!! LDLidar not opened !!!");
     exit(EXIT_FAILURE);
   }
 
   if (_lidar->WaitLidarCommConnect(3000)) {
-    RCLCPP_INFO(get_logger(), "* LDLidar communication OK");
+    RCLCPP_INFO(get_logger(), " * LDLidar communication OK");
   } else {
-    RCLCPP_ERROR(get_logger(), "* LDLidar communication KO");
+    RCLCPP_ERROR(get_logger(), " !!! LDLidar communication KO !!!");
     exit(EXIT_FAILURE);
   }
 

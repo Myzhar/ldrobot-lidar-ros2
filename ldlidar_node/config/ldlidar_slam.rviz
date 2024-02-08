@@ -8,6 +8,7 @@ Panels:
         - /RobotModel1/Mass Properties1
         - /RobotModel1/Description Topic1
         - /TF1/Tree1
+        - /LaserScan1
         - /LaserScan1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 787
@@ -134,7 +135,7 @@ Visualization Manager:
       Name: LaserScan
       Position Transformer: XYZ
       Selectable: false
-      Size (Pixels): 3
+      Size (Pixels): 5
       Size (m): 0.009999999776482582
       Style: Points
       Topic:
@@ -171,7 +172,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -221,11 +222,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 100.12590026855469
+      Scale: 127.0882339477539
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 0
-      Y: 0
+      X: 0.4318261742591858
+      Y: -0.5287667512893677
     Saved:
       - Angle: 0
         Class: rviz_default_plugins/TopDownOrtho

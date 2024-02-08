@@ -127,14 +127,14 @@ private:
   std::string _lidarModel;        // Lidar Model: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
   std::string _serialPort;        // Serial port name
   int _baudrate = 230400;         // Serial baudrate
-  int _readTimeOut_msec = 1500;   // Serial read timeout in msec
+  int _readTimeOut_msec = 1000;   // Serial read timeout in msec
   bool _counterclockwise = true;  // Rotation verse
-  bool _enableAngleCrop = false;  // TODO ADD NODE PARAMETER
-  double _angleCropMin = 0;       // TODO ADD NODE PARAMETER
-  double _angleCropMax = 180;     // TODO ADD NODE PARAMETER
-  int _bins = 455;                // TODO ADD NODE PARAMETER
-  double _rangeMin = 0.03;        // TODO ADD NODE PARAMETER
-  double _rangeMax = 25.0;        // TODO ADD NODE PARAMETER
+  bool _enableAngleCrop = true;   // Enable angle cropping
+  double _angleCropMin = 90.0;    // Angle cropping minimum value
+  double _angleCropMax = 270.0;   // Angle cropping maximum value
+  int _bins = 455;                // Fixed number of bins
+  double _rangeMin = 0.03;        // Minimum range
+  double _rangeMax = 25.0;        // Maximum range
   std::string _frameId = "ldlidar_link";
   // <---- Parameters
 
