@@ -33,8 +33,8 @@
 #include <nav2_util/lifecycle_node.hpp>
 
 #include "visibility_control.hpp"
-#include "cmd_interface_linux.hpp"
-#include "lipkg.hpp"
+#include "defines.hpp"
+#include "ldlidar_driver.h"
 
 namespace lc = rclcpp_lifecycle;
 
@@ -118,49 +118,51 @@ protected:
   void startLidarThread();
   void stopLidarThread();
   void lidarThreadFunc();
-  void lidarReadCallback(const char * byte, size_t len);
 
-  void publishLaserScan();
+  void publishLaserScan(ldlidar::Points2D & src, double lidar_spin_freq);
 
 private:
   // ----> Parameters
-  bool mDebugMode = true;
-  bool mUseDirectSerial = false;  // Set to true if using a direct uart connection
-  std::string mSerialPort;        // Serial port to use when @ref mUseDirectSerial is true
-
-  UNITS mUnits = UNITS::METERS;
-  ROTATION mRotVerse = ROTATION::CLOCKWISE;
-  std::string mFrameId = "ldlidar_link";
+  bool _debugMode = true;
+  std::string _lidarModel;        // Lidar Model: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
+  std::string _serialPort;        // Serial port name
+  int _baudrate = 230400;         // Serial baudrate
+  int _readTimeOut_msec = 1000;   // Serial read timeout in msec
+  bool _counterclockwise = true;  // Rotation verse
+  bool _enableAngleCrop = true;   // Enable angle cropping
+  double _angleCropMin = 90.0;    // Angle cropping minimum value
+  double _angleCropMax = 270.0;   // Angle cropping maximum value
+  int _bins = 455;                // Fixed number of bins
+  double _rangeMin = 0.03;        // Minimum range
+  double _rangeMax = 25.0;        // Maximum range
+  std::string _frameId = "ldlidar_link";
   // <---- Parameters
 
+  // Processing
+  float _distScale = 0.001; // Scale factor to match the units setting
+
   // Publisher
-  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::LaserScan>> mScanPub;
+  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::LaserScan>> _scanPub;
 
   // ----> Topics
-  std::string mTopicRoot = "~/";
-  std::string mScanTopic = "scan";
+  std::string _topicRoot = "~/";
+  std::string _scanTopic = "scan";
   // <---- Topics
 
-  // ----> QoS
-  rclcpp::SensorDataQoS mLidarQos;
-  // <---- QoS
-
   // Diagnostic updater
-  diagnostic_updater::Updater mDiagUpdater;
-
-  // Lidar
-  std::unique_ptr<LiPkg> mLidar;
+  diagnostic_updater::Updater _diagUpdater;
 
   // Lidar communication
-  std::unique_ptr<CmdInterfaceLinux> mLidarComm;
+  std::unique_ptr<ldlidar::LDLidarDriver> _lidar;
+  ldlidar::LDType _lidarType;
 
   // Lidar Thread
-  std::thread mLidarThread;
-  bool mThreadStop = false;
+  std::thread _lidarThread;
+  bool _threadStop = false;
 
   // Diagnostic
-  double mPubFreq;
-  bool mPublishing;
+  double _pubFreq;
+  bool _publishing;
 };
 
 }  // namespace ldlidar

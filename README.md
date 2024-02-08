@@ -120,11 +120,19 @@ The `ldlidar_with_mgr.launch.py` script automatically starts the `ldlidar_node` 
 Following the list of node parameters:
 
 * **`general.debug_mode`**: set to `true` to activate debug messages
-* **`comm.direct_serial`**: set to `false` to use the USB <-> UART converter, `true` for direct UART connection 
-* **`comm.serial_port`**: the serial port path if using direct UART connection
+* **`comm.serial_port`**: the serial port path
+* **`comm.baudrate`**: the serial port baudrate
+* **`comm.timeout_msec`**: the serial communication timeout in milliseconds
+* **`lidar.model`**: Lidar model [LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L]
+* **`lidar.rot_verse`**: The rotation verse. Use clockwise if the lidar is mounted upsidedown. [CW, CCW]
+* **`lidar.units`**: distance measurement units [M, CM, MM]
 * **`lidar.frame_id`**: TF frame name for the lidar
-* **`lidar.rot_verse`**: 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
-* **`lidar.units`**: 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+* **`lidar.bins`**: set to 0 for dinamic scan size according to rotation speed, set to a fixed value [e.g. 455] for compatibility with SLAM Toolbox
+* **`lidar.range_min`**: minimum scan distance
+* **`lidar.range_max`**: maximum scan distance
+* **`lidar.enable_angle_crop`**: enable angle cropping
+* **`lidar.angle_crop_min`**: minimum cropping angle
+* **`lidar.angle_crop_max`**: maximum cropping angle
 
 ## Display scan on RVIZ2
 
@@ -145,6 +153,14 @@ Follow the following procedure, to integrate the `ldlidar_node` in a robot confi
 * Include the [`ldlidar.launch.py`](ldlidar_node/launch/ldlidar.launch.py) in the bringup launch file of the robot. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
 * Handle lifecycle to correctly start the node. You can use the Nav2 `lifecycle_manager`, by including it in the bringup launch file. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
 * Enjoy your working system
+
+## SLAM Toolbox example
+
+The launch file `ldlidar_slam.launch.py` shows how to use the node with the [SLAM Toolbox](https://github.com/SteveMacenski/slam_toolbox) package to generate a 2D map for robot navigation.
+
+![](./images/ld19_slam.png)
+
+
 
 
 

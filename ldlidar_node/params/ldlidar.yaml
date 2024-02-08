@@ -8,10 +8,18 @@
       debug_mode: true # true to activate debug messages
 
     comm:
-      direct_serial: false # false to use usb to serial converter
-      serial_port: "/dev/ldlidar" # serial port name if `direct-serial` is true
+      serial_port: '/dev/ldlidar' # serial port name
+      baudrate: 230400 # serial baudrate
+      timeout_msec: 1000 # data communication timeout in msec
 
     lidar:
-      frame_id: "ldlidar_link" # TF frame name for the lidar
-      rot_verse: 1 # 0 -> `CLOCKWISE` / 1 -> `COUNTERCLOCKWISE` [ROS STANDARD]
-      units: 2 # 0 -> `MILLIMETERS` / 1 -> `CENTIMETERS` / 2 -> `METERS` [ROS STANDARD]
+      model: 'LDLiDAR_LD19' # Model type: LDLiDAR_LD06, LDLiDAR_LD19, LDLiDAR_STL27L
+      rot_verse: 'CCW' # 'CW' -> `CLOCKWISE` / 'CCW' -> `COUNTERCLOCKWISE` [ROS STANDARD]
+      units: 'M' # 'MM' -> `MILLIMETERS` / 'CM' -> `CENTIMETERS` / 'M' -> `METERS` [ROS STANDARD]
+      frame_id: 'ldlidar_link' # TF frame name for the lidar
+      bins: 455 # set to 0 for dinamic scan size according to rotation speed, set to a fixed value [e.g. 455] for compatibility with SLAM Toolbox
+      range_min: 0.03 # Minimum distance in 'units'
+      range_max: 25.0 # Maximum distance in 'units'
+      enable_angle_crop: false # enable angle cropping
+      angle_crop_min: 90.0 # minimum angle for cropping
+      angle_crop_max: 270.0 # maximum angle for cropping

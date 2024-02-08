@@ -65,32 +65,40 @@ std::string qos2str(rmw_qos_durability_policy_t qos)
   return "Unknown QoS value";
 }
 
-std::string to_string(ldlidar::UNITS val)
+// std::string to_string(ldlidar::UNITS val)
+// {
+//   switch (val) {
+//     case ldlidar::UNITS::MILLIMETERS:
+//       return "MILLIMETERS";
+
+//     case ldlidar::UNITS::CENTIMETERS:
+//       return "CENTIMETERS";
+
+//     case ldlidar::UNITS::METERS:
+//       return "METERS";
+//   }
+
+//   return "Unknown UNITS value";
+// }
+
+// std::string to_string(ldlidar::ROTATION val)
+// {
+//   switch (val) {
+//     case ldlidar::ROTATION::CLOCKWISE:
+//       return "CLOCKWISE";
+
+//     case ldlidar::ROTATION::COUNTERCLOCKWISE:
+//       return "COUNTERCLOCKWISE";
+//   }
+
+//   return "Unknown ROTATION value";
+// }
+
+uint64_t GetSystemTimeStamp(void)
 {
-  switch (val) {
-    case ldlidar::UNITS::MILLIMETERS:
-      return "MILLIMETERS";
-
-    case ldlidar::UNITS::CENTIMETERS:
-      return "CENTIMETERS";
-
-    case ldlidar::UNITS::METERS:
-      return "METERS";
-  }
-
-  return "Unknown UNITS value";
-}
-
-std::string to_string(ldlidar::ROTATION val)
-{
-  switch (val) {
-    case ldlidar::ROTATION::CLOCKWISE:
-      return "CLOCKWISE";
-
-    case ldlidar::ROTATION::COUNTERCLOCKWISE:
-      return "COUNTERCLOCKWISE";
-  }
-
-  return "Unknown ROTATION value";
+  std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> tp =
+    std::chrono::time_point_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now());
+  auto tmp = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch());
+  return (uint64_t)tmp.count();
 }
 }  // namespace tools

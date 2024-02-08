@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(ldlidar_component)
 
-## Generate symbols for IDE indexer
+################################################
+## Generate symbols for IDE indexer (VSCode)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default to C99
@@ -102,8 +103,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 
-find_package(UDEV REQUIRED)
-
 # create ament index resource which references the libraries in the binary dir
 set(node_plugins "")
 
@@ -133,16 +132,20 @@ set(COMPONENT_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/component/src/ldlidar_component.cpp
 )
 
-set(LIDAR_DRIVER_INC
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/cmd_interface_linux.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/lipkg.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/tofbf.hpp
-)
+# LDLidar driver
+add_subdirectory(ldlidar_driver)
 
-set(LIDAR_DRIVER_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/cmd_interface_linux.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/lipkg.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/src/tofbf.cpp
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/component/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/dataprocess
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/filter
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/logger
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/networkcom
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/serialcom
+    ${UDEV_INCLUDE_DIRS}
 )
 
 ###############################################################################
@@ -153,22 +156,14 @@ add_library(${PROJECT_NAME} SHARED
     ${TOOLS_SRC}
     ${COMPONENT_INC}
     ${COMPONENT_SRC}
-    ${LIDAR_DRIVER_INC}
-    ${LIDAR_DRIVER_SRC}
+    ${LDLIDAR_DRIVER_INC}
+    ${LDLIDAR_DRIVER_SRC}
 )
-target_include_directories(${PROJECT_NAME}
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/tools/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/component/include
-    ${UDEV_INCLUDE_DIRS}
+target_link_libraries(${PROJECT_NAME}
+  ldlidar
 )
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE "COMPOSITION_BUILDING_DLL"
-)
-target_link_libraries(${PROJECT_NAME}
-    ${UDEV_LIBRARIES}
 )
 ament_target_dependencies(${PROJECT_NAME}
     ${DEPENDENCIES}
@@ -188,8 +183,13 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/component/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/tools/include/
-    ${CMAKE_CURRENT_SOURCE_DIR}/driver/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/core/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/dataprocess/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/filter/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/logger/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/networkcom/
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/serialcom/
     DESTINATION include/${PROJECT_NAME}/
 )
 

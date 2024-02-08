@@ -24,11 +24,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-
-    # Set LOG format
-    os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '{time} [{severity}] ({name}) {message}'
-    os.environ['RCUTILS_COLORIZED_OUTPUT'] = '1'
-
+    
     node_name = LaunchConfiguration('node_name')
 
     # Launch arguments
@@ -38,14 +34,14 @@ def generate_launch_description():
         description='Name of the node'
     )
 
-    # RViZ2 settings
+    # RVIZ2 settings
     rviz2_config = os.path.join(
         get_package_share_directory('ldlidar_node'),
         'config',
         'ldlidar.rviz'
     )
 
-    # Lifecycle manager node
+    # RVIZ2node
     rviz2_node = Node(
         package='rviz2',
         executable='rviz2',

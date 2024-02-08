@@ -25,8 +25,11 @@ using namespace std::placeholders;
 
 namespace ldlidar
 {
+
+const int QOS_QUEUE_SIZE = 10;
+
 LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions & options)
-: nav2_util::LifecycleNode("lidar_node", "", options), mDiagUpdater(this)
+: nav2_util::LifecycleNode("lidar_node", "", options), _diagUpdater(this)
 {
   RCLCPP_INFO(get_logger(), "****************************************");
   RCLCPP_INFO(get_logger(), " LDRobot DToF Lidar Lifecycle Component ");
@@ -36,12 +39,12 @@ LdLidarComponent::LdLidarComponent(const rclcpp::NodeOptions & options)
   RCLCPP_INFO(get_logger(), "****************************************");
   RCLCPP_INFO(
     get_logger(),
-    "State: 'unconfigured [1]'. Use lifecycle commands "
+    " + State: 'unconfigured [1]'. Use lifecycle commands "
     "to configure [1] or shutdown [5]");
 
   // ----> Diagnostic
-  mDiagUpdater.add("LDLidar Diagnostic", this, &LdLidarComponent::callback_updateDiagnostic);
-  mDiagUpdater.setHardwareID("LDRobot lidar");
+  _diagUpdater.add("LDLidar Diagnostic", this, &LdLidarComponent::callback_updateDiagnostic);
+  _diagUpdater.setHardwareID("LDRobot lidar");
   // <---- Diagnostic
 }
 
@@ -66,8 +69,8 @@ void LdLidarComponent::getParameters()
 void LdLidarComponent::getDebugParams()
 {
   // ----> Debug mode initialization from parameters
-  getParam("general.debug_mode", mDebugMode, mDebugMode, "Enable debug messages");
-  if (mDebugMode) {
+  getParam("general.debug_mode", _debugMode, _debugMode, "Enable debug messages");
+  if (_debugMode) {
     rcutils_ret_t res = rcutils_logging_set_logger_level(
       get_logger().get_name(), RCUTILS_LOG_SEVERITY_DEBUG);
 
@@ -96,16 +99,12 @@ void LdLidarComponent::getCommParams()
 
   // ----> Communication
   getParam(
-    "comm.direct_serial", mUseDirectSerial, mUseDirectSerial,
-    "Set to 'true' if not using the UART<->USB converted [not yet available]");
-  RCLCPP_INFO_STREAM(
-    get_logger(), " * Direct Serial comm: " << (mUseDirectSerial ? "TRUE" : "FALSE"));
+    "comm.serial_port", _serialPort, _serialPort, "Communication serial port path", true,
+    " * Serial port: ");
 
-  if (mUseDirectSerial) {
-    getParam(
-      "comm.serial_port", mSerialPort, mSerialPort, "Serial port name", true,
-      " * Serial port: ");
-  }
+  getParam(
+    "comm.timeout_msec", _readTimeOut_msec, _readTimeOut_msec, "Data reading timeout in msec",
+    false, " * Timeout [msec]: ");
   // <---- Communication
 }
 
@@ -115,21 +114,69 @@ void LdLidarComponent::getLidarParams()
   nav2_util::LifecycleNode::integer_range limits_int;
 
   // ----> Lidar config
-  getParam("lidar.frame_id", mFrameId, mFrameId, " * Lidar frame: ", "Name of the lidar frame");
-  int rotVerse = static_cast<int>(mRotVerse);
+  getParam("lidar.model", _lidarModel, _lidarModel, " * Lidar frame: ", "Name of the lidar frame");
+  if (_lidarModel == "LDLiDAR_LD06") {
+    _lidarType = ldlidar::LDType::LD_06;
+  } else if (_lidarModel == "LDLiDAR_LD19") {
+    _lidarType = ldlidar::LDType::LD_19;
+  } else if (_lidarModel == "LDLiDAR_STL27L") {
+    _lidarType = ldlidar::LDType::STL_27L;
+  } else {
+    RCLCPP_ERROR_STREAM(
+      get_logger(), " !!! The parameter 'lidar.model' is not valid! -> " << _lidarModel.c_str() );
+    exit(EXIT_FAILURE);
+  }
 
-  limits_int = {0, static_cast<int>(ROTATION::COUNTERCLOCKWISE), 1};
   getParam(
-    "lidar.rot_verse", rotVerse, rotVerse, limits_int,
-    "Change rotation verse. To be used if the lidar is mounted upside down.", true);
-  mRotVerse = static_cast<ROTATION>(rotVerse);
-  RCLCPP_INFO_STREAM(get_logger(), " * Rotation verse: " << tools::to_string(mRotVerse));
+    "lidar.frame_id", _frameId, _frameId, "Name of the lidar frame", true,
+    " * Lidar frame: ");
 
-  limits_int = {0, static_cast<int>(UNITS::METERS), 1};
-  int units = static_cast<int>(mUnits);
-  getParam("lidar.units", units, units, limits_int, "Set measurement units");
-  mUnits = static_cast<UNITS>(units);
-  RCLCPP_INFO_STREAM(get_logger(), " * Measure units: " << tools::to_string(mUnits));
+  std::string units_str = "M";
+  getParam("lidar.units", units_str, units_str, "Measure units", true, " * Units: ");
+
+  if (units_str == "MM") {
+    _distScale = 1.0f;
+  } else if (units_str == "CM") {
+    _distScale = 0.1f;
+  } else {
+    if (units_str != "M") {
+      RCLCPP_WARN(get_logger(), "Parameter 'lidar.units' not valid, using the default value: 'M'");
+    }
+    _distScale = 0.001f;
+  }
+
+  std::string rot_verse = "CCW";
+  getParam(
+    "lidar.rot_verse", rot_verse, rot_verse, " * Rotation verse: ",
+    "Rotation verse, use 'CW' if upsidedown");
+  if (rot_verse == "CW") {
+    _counterclockwise = false;
+  } else {
+    if (rot_verse != "CCW") {
+      RCLCPP_WARN(
+        get_logger(), "Parameter 'lidar.rot_verse' not valid, using the default value: 'CCW'");
+    }
+    _counterclockwise = true;
+  }
+
+  getParam(
+    "lidar.bins", _bins, _bins, "Fixed number of data beams. 0 for dynamic", true,
+    " * Bins: ");
+  getParam(
+    "lidar.range_min", _rangeMin, _rangeMin, "Minimum distance in units", false,
+    " * Minimum distance: ");
+  getParam(
+    "lidar.range_max", _rangeMax, _rangeMax, "Maximum distance in units", false,
+    " * Minimum distance: ");
+  getParam(
+    "lidar.enable_angle_crop", _enableAngleCrop, _enableAngleCrop, "Angle cropping", false,
+    " * Angle cropping: ");
+  getParam(
+    "lidar.angle_crop_min", _angleCropMin, _angleCropMin, "Angle cropping minimum angle",
+    false, " * Angle cropping min angle: ");
+  getParam(
+    "lidar.angle_crop_max", _angleCropMax, _angleCropMax, "Angle cropping maximum angle",
+    false, " * Angle cropping max angle: ");
   // <---- Lidar config
 }
 
@@ -221,12 +268,17 @@ nav2_util::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_
   getParameters();
 
   // ----> Initialize topics
-  mScanTopic = mTopicRoot + std::string("scan");
+  _scanTopic = _topicRoot + std::string("scan");
   // <---- Initialize topics
 
   // ----> Initialize publisher
-  if (!mScanPub) {
-    mScanPub = this->create_publisher<sensor_msgs::msg::LaserScan>(mScanTopic, mLidarQos);
+  rclcpp::QoS qos(QOS_QUEUE_SIZE);
+
+  auto pub_opt = rclcpp::PublisherOptions();
+  pub_opt.qos_overriding_options = rclcpp::QosOverridingOptions::with_default_policies();
+
+  if (!_scanPub) {
+    _scanPub = this->create_publisher<sensor_msgs::msg::LaserScan>(_scanTopic, qos, pub_opt);
   }
   // <---- Initialize publisher
 
@@ -240,7 +292,7 @@ nav2_util::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'inactive [2]'. Use lifecycle commands to "
+    " + State: 'inactive [2]'. Use lifecycle commands to "
     "activate [3], cleanup [2] or shutdown "
     "[6]");
   return nav2_util::CallbackReturn::SUCCESS;
@@ -256,14 +308,14 @@ nav2_util::CallbackReturn LdLidarComponent::on_activate(const lc::State & prev_s
   createBond();
 
   // Activate publisher
-  mScanPub->on_activate();
+  _scanPub->on_activate();
 
   // Start lidar thread
   startLidarThread();
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'active [3]'. Use lifecycle commands to "
+    " + State: 'active [3]'. Use lifecycle commands to "
     "deactivate [4] or shutdown [7]");
   return nav2_util::CallbackReturn::SUCCESS;
 }
@@ -279,14 +331,14 @@ nav2_util::CallbackReturn LdLidarComponent::on_deactivate(const lc::State & prev
   destroyBond();
 
   // Dectivate publisher
-  mScanPub->on_deactivate();
+  _scanPub->on_deactivate();
 
   // Stop Lidar THread
   stopLidarThread();
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'inactive [2]'. Use lifecycle commands to "
+    " + State: 'inactive [2]'. Use lifecycle commands to "
     "activate [3], cleanup [2] or shutdown "
     "[6]");
   return nav2_util::CallbackReturn::SUCCESS;
@@ -298,11 +350,11 @@ nav2_util::CallbackReturn LdLidarComponent::on_cleanup(const lc::State & prev_st
     get_logger(), "on_cleanup: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                  << "] -> Unconfigured");
 
-  mScanPub.reset();
+  _scanPub.reset();
 
   RCLCPP_INFO(
     get_logger(),
-    "State: 'unconfigured [1]'. Use lifecycle commands "
+    " + State: 'unconfigured [1]'. Use lifecycle commands "
     "to configure [1] or shutdown [5]");
   return nav2_util::CallbackReturn::SUCCESS;
 }
@@ -313,9 +365,9 @@ nav2_util::CallbackReturn LdLidarComponent::on_shutdown(const lc::State & prev_s
     get_logger(), "on_shutdown: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                   << "] -> Finalized");
 
-  mScanPub.reset();
+  _scanPub.reset();
 
-  RCLCPP_INFO_STREAM(get_logger(), "State: 'finalized [4]'. Press Ctrl+C to kill...");
+  RCLCPP_INFO_STREAM(get_logger(), " + State: 'finalized [4]'. Press Ctrl+C to kill...");
   return nav2_util::CallbackReturn::SUCCESS;
 }
 
@@ -325,88 +377,144 @@ nav2_util::CallbackReturn LdLidarComponent::on_error(const lc::State & prev_stat
     get_logger(), "on_error: " << prev_state.label() << " [" << static_cast<int>(prev_state.id())
                                << "] -> Finalized");
 
-  RCLCPP_INFO_STREAM(get_logger(), "State: 'finalized [4]'. Press Ctrl+C to kill...");
+  RCLCPP_INFO_STREAM(get_logger(), " + State: 'finalized [4]'. Press Ctrl+C to kill...");
   return nav2_util::CallbackReturn::FAILURE;
 }
 
-void LdLidarComponent::publishLaserScan()
+void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_spin_freq)
 {
-  static size_t count = 0;
+  float angle_min, angle_max, angle_increment;
+  double scan_time;
+  rclcpp::Time start_scan_time;
+  static rclcpp::Time end_scan_time;
+  static bool first_scan = true;
 
-  // Print the current state for demo purposes
-  if (!mScanPub->is_activated()) {
-    auto & clk = *this->get_clock();
-    RCLCPP_INFO_THROTTLE(
-      get_logger(), clk, 5000,
-      "Lifecycle publisher is currently inactive. Messages "
-      "are not published.");
-    return;
+  int beam_size = 0;
+
+  // With a fixed number of bins the compatibility with SlamToolbox is guaranteed
+  if (_bins > 0) {
+    beam_size = _bins;
+  } else {
+    beam_size = static_cast<int>(src.size());
   }
 
-  auto msg = mLidar->GetLaserScan();
-  mLidar->ResetFrameReady();
-  // We independently from the current state call publish on the lifecycle
-  // publisher.
-  // Only if the publisher is in an active state, the message transfer is
-  // enabled and the message actually published.
-  mScanPub->publish(std::move(msg));
+  start_scan_time = this->now();
+  scan_time = (start_scan_time.seconds() - end_scan_time.seconds());
+
+  if (first_scan) {
+    first_scan = false;
+    end_scan_time = start_scan_time;
+    return;
+  }
+  // Adjust the parameters according to the demand
+  angle_min = 0;
+  angle_max = (2 * M_PI);
+  angle_increment = (angle_max - angle_min) / (float)(beam_size - 1);
+  // Calculate the number of scanning points
+  if (lidar_spin_freq > 0) {
+    std::unique_ptr<sensor_msgs::msg::LaserScan> msg =
+      std::make_unique<sensor_msgs::msg::LaserScan>();
+    msg->header.stamp = start_scan_time;
+    msg->header.frame_id = _frameId;
+    msg->angle_min = angle_min;
+    msg->angle_max = angle_max;
+    msg->range_min = _rangeMin;
+    msg->range_max = _rangeMax;
+    msg->angle_increment = angle_increment;
+    if (beam_size <= 1) {
+      msg->time_increment = 0;
+    } else {
+      msg->time_increment = static_cast<float>(scan_time / (double)(beam_size - 1));
+    }
+    msg->scan_time = scan_time;
+    // First fill all the data with Nan
+    msg->ranges.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
+    msg->intensities.assign(beam_size, std::numeric_limits<float>::quiet_NaN());
+    for (auto point : src) {
+      float range = point.distance * _distScale;  // distance unit transform to meters
+      float intensity = point.intensity;      // laser receive intensity
+      float dir_angle = point.angle;
+
+      if ((point.distance == 0) && (point.intensity == 0)) { // filter is handled to  0, Nan will be assigned variable.
+        range = std::numeric_limits<float>::quiet_NaN();
+        intensity = std::numeric_limits<float>::quiet_NaN();
+      }
+
+      if (_enableAngleCrop) { // Angle crop setting, Mask data within the set angle range
+        if ((dir_angle >= _angleCropMin) && (dir_angle <= _angleCropMax)) {
+          range = std::numeric_limits<float>::quiet_NaN();
+          intensity = std::numeric_limits<float>::quiet_NaN();
+        }
+      }
+
+      float angle = ANGLE_TO_RADIAN(dir_angle); // Lidar angle unit form degree transform to radian
+      int index = static_cast<int>(ceil((angle - angle_min) / angle_increment));
+      if (index < beam_size) {
+        if (index < 0) {
+          RCLCPP_ERROR(
+            get_logger(), "error index: %d, beam_size: %d, angle: %f, msg->angle_min: %f, msg->angle_increment: %f",
+            index, beam_size, angle, angle_min, angle_increment);
+        }
+
+        if (_counterclockwise) {
+          int index_anticlockwise = beam_size - index - 1;
+          // If the current content is Nan, it is assigned directly
+          if (std::isnan(msg->ranges[index_anticlockwise])) {
+            msg->ranges[index_anticlockwise] = range;
+          } else { // Otherwise, only when the distance is less than the current
+                   //   value, it can be re assigned
+            if (range < msg->ranges[index_anticlockwise]) {
+              msg->ranges[index_anticlockwise] = range;
+            }
+          }
+          msg->intensities[index_anticlockwise] = intensity;
+        } else {
+          // If the current content is Nan, it is assigned directly
+          if (std::isnan(msg->ranges[index])) {
+            msg->ranges[index] = range;
+          } else { // Otherwise, only when the distance is less than the current
+                   //   value, it can be re assigned
+            if (range < msg->ranges[index]) {
+              msg->ranges[index] = range;
+            }
+          }
+          msg->intensities[index] = intensity;
+        }
+      }
+    }
+    _scanPub->publish(std::move(msg));
+    end_scan_time = start_scan_time;
+  }
 }
 
 bool LdLidarComponent::initLidar()
 {
-  mLidar = std::make_unique<LiPkg>(get_clock());
+  _lidar = std::make_unique<ldlidar::LDLidarDriver>();
+
+  _lidar->RegisterGetTimestampFunctional(std::bind(&tools::GetSystemTimeStamp));
+  _lidar->EnableFilterAlgorithnmProcess(true);
 
   if (!initLidarComm()) {
-    return false;
-  }
-
-  // Set serial reading callback
-  mLidarComm->SetReadCallback(std::bind(&LdLidarComponent::lidarReadCallback, this, _1, _2));
-
-  if (mLidarComm->Open(mSerialPort)) {
-    RCLCPP_INFO_STREAM(get_logger(), "LDLidar connection successful");
-  } else {
-    RCLCPP_ERROR_STREAM(get_logger(), "LDLidar connection failed!");
     return false;
   }
 
   return true;
 }
 
-void LdLidarComponent::lidarReadCallback(const char * byte, size_t len)
-{
-  if (mLidar->Parse(reinterpret_cast<const uint8_t *>(byte), len)) {
-    mLidar->AssemblePacket();
-  }
-}
-
 bool LdLidarComponent::initLidarComm()
 {
-  // USB <-> UART converter
-  mLidarComm = std::make_unique<CmdInterfaceLinux>();
-
-  if (!mUseDirectSerial) {
-    std::vector<std::pair<std::string, std::string>> device_list;
-
-    mLidarComm->GetCmdDevices(device_list);
-    for (auto n : device_list) {
-      RCLCPP_DEBUG_STREAM(get_logger(), "Device found: " << n.first << "    " << n.second);
-      if (strstr(n.second.c_str(), "CP2102")) {
-        mSerialPort = n.first;
-      }
-    }
-
-    if (mSerialPort.empty()) {
-      RCLCPP_ERROR(get_logger(), "Can't find CP2102 USB<->UART converter.");
-      return false;
-    }
-
-    RCLCPP_INFO(
-      get_logger(),
-      "Found CP2102 USB<->UART converter. Trying to "
-      "connect to lidar device...");
+  if (_lidar->Start(_lidarType, _serialPort, _baudrate, ldlidar::COMM_SERIAL_MODE)) {
+    RCLCPP_INFO_STREAM(get_logger(), "***** LDLidar opened on port '" << _serialPort << "' *****");
   } else {
-    RCLCPP_DEBUG_STREAM(get_logger(), "Opening Serial port: " << mSerialPort);
+    RCLCPP_ERROR(get_logger(), "!!! LDLidar not opened !!!");
+    exit(EXIT_FAILURE);
+  }
+
+  if (_lidar->WaitLidarCommConnect(3000)) {
+    RCLCPP_INFO(get_logger(), " * LDLidar communication OK");
+  } else {
+    RCLCPP_ERROR(get_logger(), " !!! LDLidar communication KO !!!");
+    exit(EXIT_FAILURE);
   }
 
   return true;
@@ -414,17 +522,17 @@ bool LdLidarComponent::initLidarComm()
 
 void LdLidarComponent::startLidarThread()
 {
-  mLidarThread = std::thread(&LdLidarComponent::lidarThreadFunc, this);
+  _lidarThread = std::thread(&LdLidarComponent::lidarThreadFunc, this);
 }
 
 void LdLidarComponent::stopLidarThread()
 {
-  if (!mThreadStop) {
-    mThreadStop = true;
+  if (!_threadStop) {
+    _threadStop = true;
     RCLCPP_DEBUG(get_logger(), "Stopping lidar thread...");
     try {
-      if (mLidarThread.joinable()) {
-        mLidarThread.join();
+      if (_lidarThread.joinable()) {
+        _lidarThread.join();
       }
     } catch (std::system_error & e) {
       RCLCPP_WARN(get_logger(), "Lidar thread joining exception: %s", e.what());
@@ -436,38 +544,45 @@ void LdLidarComponent::lidarThreadFunc()
 {
   RCLCPP_DEBUG(get_logger(), "Lidar thread started");
 
-  mThreadStop = false;
+  _threadStop = false;
   rclcpp::Time prev_ts = get_clock()->now();
-  mPublishing = false;
+  _publishing = false;
+
+  ldlidar::Points2D laser_scan_points;
+  double lidar_scan_freq;
 
   while (1) {
     // ----> Interruption check
     if (!rclcpp::ok()) {
       RCLCPP_DEBUG(get_logger(), "Ctrl+C received: stopping grab thread");
-      mThreadStop = true;
+      _threadStop = true;
     }
 
-    if (mThreadStop) {
+    if (_threadStop) {
       RCLCPP_DEBUG(get_logger(), "Lidar thread stopped");
       break;
     }
     // <---- Interruption check
 
-    int nSub = count_subscribers(mScanTopic);
+    int nSub = count_subscribers(_scanTopic);
     if (nSub > 0) {
-      mPublishing = true;
-      if (mLidar->IsFrameReady()) {
-        rclcpp::Time ts = get_clock()->now();
-        double dt = (ts - prev_ts).nanoseconds();
-
-        mPubFreq = (1e9 / dt);
-        // RCLCPP_DEBUG_STREAM(get_logger(), "Lidar thread freq: " << mPubFreq << " Hz");
-
-        publishLaserScan();
-        prev_ts = ts;
+      _publishing = true;
+      switch (_lidar->GetLaserScanData(laser_scan_points, _readTimeOut_msec)) {
+        case ldlidar::LidarStatus::NORMAL:
+          _lidar->GetLidarScanFreq(lidar_scan_freq);
+          publishLaserScan(laser_scan_points, lidar_scan_freq);
+          break;
+        case ldlidar::LidarStatus::DATA_TIME_OUT:
+          RCLCPP_ERROR(
+            get_logger(), "get ldlidar data is time out, please check your lidar device.");
+          break;
+        case ldlidar::LidarStatus::DATA_WAIT:
+          break;
+        default:
+          break;
       }
     } else {
-      mPublishing = false;
+      _publishing = false;
     }
   }
 
@@ -483,10 +598,12 @@ void LdLidarComponent::callback_updateDiagnostic(diagnostic_updater::DiagnosticS
       diagnostic_msgs::msg::DiagnosticStatus::OK, std::string(
         "Node state: ") + state.label());
 
-    stat.addf("Single measure", "%.3f Hz", mLidar->GetSpeed());
+    double spin_hz;
+    _lidar->GetLidarScanFreq(spin_hz);
+    stat.addf("Single measure", "%.3f Hz", spin_hz);
 
-    if (mPublishing) {
-      stat.addf("Publishing", "%.3f Hz", mPubFreq);
+    if (_publishing) {
+      stat.addf("Publishing", "%.3f Hz", _pubFreq);
     } else {
       stat.add("Publishing", "NO SUBSCRIBERS");
     }
