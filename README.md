@@ -76,7 +76,7 @@ Update the environment variables:
 
 Open a terminal console and enter the following command:
 
-    ros2 run ldlidar_node ldlidar_node
+    ros2 run ldlidar_node ldlidar_node # <--- not recommended. Better using the launch file 
 
 the `ldlidar` node is based on the [`ROS2 lifecycle` architecture](https://design.ros2.org/articles/node_lifecycle.html), hence it starts in the `UNCONFIGURED` state.
 To configure the node, setting all the parameters to the default value, trying to estabilish a connection, and activating the scan publisher, the lifecycle services must be called.
