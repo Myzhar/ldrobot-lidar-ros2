@@ -2,7 +2,7 @@
   ldrobot-lidar-ros2
 </h1>
 
-<h4 align="center">ROS2 package for LDRobot lidar. Based on Nav2 Lifecycle nodes</h4>
+<h4 align="center">ROS 2 package for LDRobot lidar. Based on Nav2 Lifecycle nodes</h4>
 
 <p align="center">
   <a href="#get-the-lidar">Get the lidar</a> •
