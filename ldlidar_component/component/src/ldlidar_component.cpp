@@ -551,6 +551,8 @@ void LdLidarComponent::lidarThreadFunc()
   ldlidar::Points2D laser_scan_points;
   double lidar_scan_freq;
 
+  rclcpp::Rate rate(20.0);
+
   while (1) {
     // ----> Interruption check
     if (!rclcpp::ok()) {
@@ -584,6 +586,8 @@ void LdLidarComponent::lidarThreadFunc()
     } else {
       _publishing = false;
     }
+
+    rate.sleep();
   }
 
   RCLCPP_DEBUG(get_logger(), "Lidar thread finished");
