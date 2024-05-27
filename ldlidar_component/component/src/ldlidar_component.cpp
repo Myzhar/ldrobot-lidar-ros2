@@ -545,7 +545,6 @@ void LdLidarComponent::lidarThreadFunc()
   RCLCPP_DEBUG(get_logger(), "Lidar thread started");
 
   _threadStop = false;
-  rclcpp::Time prev_ts = get_clock()->now();
   _publishing = false;
 
   ldlidar::Points2D laser_scan_points;
@@ -583,6 +582,17 @@ void LdLidarComponent::lidarThreadFunc()
       }
     } else {
       _publishing = false;
+    }
+  
+    // Sleep until the next scan is ready
+    using std::chrono::nanoseconds;
+    if (_lidar->GetLidarScanFreq(lidar_scan_freq) && lidar_scan_freq != 0.0)
+    {
+      rclcpp::sleep_for(nanoseconds(int64_t(1e9 / lidar_scan_freq)));
+    }
+    else
+    {
+      rclcpp::sleep_for(nanoseconds(int64_t(1e9 / 10)));
     }
   }
 
