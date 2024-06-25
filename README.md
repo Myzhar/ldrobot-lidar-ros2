@@ -11,7 +11,7 @@
   <a href="#start-the-node">Start the Node</a> •
   <a href="#parameters">Parameters</a> •
   <a href="#display-scan-on-rviz2">RViz2</a> •  
-  <a href="#integrate-the-node-in-your-robot">Robot integration</a>
+  <a href="#integrate-the-node-in-your-robot">Robot integration</a> • 
   <a href="#benchmarking">Benchmarking</a>
 </p>
 <br>
