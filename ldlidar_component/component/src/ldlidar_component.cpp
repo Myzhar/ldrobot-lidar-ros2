@@ -583,15 +583,12 @@ void LdLidarComponent::lidarThreadFunc()
     } else {
       _publishing = false;
     }
-  
+
     // Sleep until the next scan is ready
     using std::chrono::nanoseconds;
-    if (_lidar->GetLidarScanFreq(lidar_scan_freq) && lidar_scan_freq != 0.0)
-    {
+    if (_lidar->GetLidarScanFreq(lidar_scan_freq) && lidar_scan_freq != 0.0) {
       rclcpp::sleep_for(nanoseconds(int64_t(1e9 / lidar_scan_freq)));
-    }
-    else
-    {
+    } else {
       rclcpp::sleep_for(nanoseconds(int64_t(1e9 / 10)));
     }
   }

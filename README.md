@@ -12,6 +12,7 @@
   <a href="#parameters">Parameters</a> •
   <a href="#display-scan-on-rviz2">RViz2</a> •  
   <a href="#integrate-the-node-in-your-robot">Robot integration</a>
+  <a href="#benchmarking">Benchmarking</a>
 </p>
 <br>
 
@@ -160,9 +161,57 @@ The launch file `ldlidar_slam.launch.py` shows how to use the node with the [SLA
 
 ![](./images/ld19_slam.png)
 
+## Benchmarking
 
+It is possible to benchmark the node to evaluate the overall performance by using the [NVIDIA® ISAAC ROS ros2_benchmark package](https://github.com/NVIDIA-ISAAC-ROS/ros2_benchmark).
 
+First of all install the [ros2_benchmark package](https://github.com/NVIDIA-ISAAC-ROS/ros2_benchmark/tree/main?tab=readme-ov-file#quickstart).
 
+Launch the benchmark:
+
+    cd ~/ros2_ws/src/ldrobot-lidar-ros2/test/
+    launch_test ldlidar_benchmark.py
+
+the final result should be similar to 
+
+```
++--------------------------------------------------------------------------------------------+
+|                                  LD Lidar Live Benchmark                                   |
+|                                        Final Report                                        |
++--------------------------------------------------------------------------------------------+
+| [Scan] Delta between First & Last Received Frames (ms) : 4910.833                          |
+| [Scan] Mean Playback Frame Rate (fps) : 10.182                                             |
+| [Scan] Mean Frame Rate (fps) : 10.182                                                      |
+| [Scan] # of Missed Frames : 0.000                                                          |
+| [Scan] # of Frames Sent : 50.000                                                           |
+| [Scan] First Sent to First Received Latency (ms) : 0.156                                   |
+| [Scan] Last Sent to Last Received Latency (ms) : 0.235                                     |
+| [Scan] First Frame End-to-end Latency (ms) : 0.156                                         |
+| [Scan] Last Frame End-to-end Latency (ms) : 0.235                                          |
+| [Scan] Max. End-to-End Latency (ms) : 0.265                                                |
+| [Scan] Min. End-to-End Latency (ms) : 0.093                                                |
+| [Scan] Mean End-to-End Latency (ms) : 0.189                                                |
+| [Scan] Max. Frame-to-Frame Jitter (ms) : 0.594                                             |
+| [Scan] Min. Frame-to-Frame Jitter (ms) : 0.000                                             |
+| [Scan] Mean Frame-to-Frame Jitter (ms) : 0.218                                             |
+| [Scan] Frame-to-Frame Jitter Std. Deviation (ms) : 0.145                                   |
++--------------------------------------------------------------------------------------------+
+| Baseline Overall CPU Utilization (%) : 8.333                                               |
+| Max. Overall CPU Utilization (%) : 66.667                                                  |
+| Min. Overall CPU Utilization (%) : 0.000                                                   |
+| Mean Overall CPU Utilization (%) : 0.856                                                   |
+| Std Dev Overall CPU Utilization (%) : 3.420                                                |
++--------------------------------------------------------------------------------------------+
+| [metadata] Test Name : LD Lidar Live Benchmark                                             |
+| [metadata] Test File Path : /home/walter/devel/ros2/ros2_walt/src/ldrobot-lidar-ros2/ldlidar_node/test/ldlidar_benchmark.py |
+| [metadata] Test Datetime : 2024-06-25T20:05:40Z                                            |
+| [metadata] Device Hostname : walter-Legion-5-15ACH6H                                       |
+| [metadata] Device Architecture : x86_64                                                    |
+| [metadata] Device OS : Linux 6.5.0-25-generic #25~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Feb 20 16:09:15 UTC 2 |
+| [metadata] Idle System CPU Util. (%) : 0.500                                               |
+| [metadata] Benchmark Mode : 3                                                              |
++--------------------------------------------------------------------------------------------+
+```
 
 
 
