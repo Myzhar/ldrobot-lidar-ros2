@@ -82,23 +82,10 @@ protected:
   template<typename T>
   void getParam(
     std::string paramName, T defValue, T & outVal,
-    const std::string & description = "",
-    bool read_only = true,
-    std::string log_info = std::string());
-
-  void getParam(
-    std::string paramName, int defValue, int & outVal,
-    const nav2_util::LifecycleNode::integer_range & range,
-    const std::string & description = "",
-    bool read_only = true,
-    std::string log_info = std::string());
-
-  void getParam(
-    std::string paramName, float defValue, float & outVal,
-    const nav2_util::LifecycleNode::floating_point_range & range,
-    const std::string & description = "",
-    bool read_only = true,
-    std::string log_info = std::string());
+    std::string log_info = std::string(),
+    bool dynamic = false,
+    std::string description = std::string(),
+    T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max());
 
   void getParameters();
   void getDebugParams();
@@ -134,7 +121,7 @@ private:
   double _angleCropMax = 270.0;   // Angle cropping maximum value
   int _bins = 455;                // Fixed number of bins
   double _rangeMin = 0.03;        // Minimum range
-  double _rangeMax = 25.0;        // Maximum range
+  double _rangeMax = 15.0;        // Maximum range
   std::string _frameId = "ldlidar_link";
   // <---- Parameters
 
@@ -164,6 +151,64 @@ private:
   double _pubFreq;
   bool _publishing;
 };
+
+// ----> Template Function definitions
+template<typename T>
+void LdLidarComponent::getParam(
+  std::string paramName, T defValue, T & outVal,
+  std::string description, bool dynamic,
+  std::string log_info,
+  T minVal, T maxVal)
+{
+  rcl_interfaces::msg::ParameterDescriptor descriptor;
+  descriptor.read_only = !dynamic;
+
+  std::stringstream ss;
+  ss << description << " - Default value: ";
+  if constexpr (std::is_same<T, bool>::value) {
+    ss << (defValue ? "TRUE" : "FALSE");
+  } else {
+    ss << defValue;
+  }
+  descriptor.description = ss.str();
+
+  if constexpr (std::is_same<T, double>::value) {
+    descriptor.additional_constraints = "Range: [" + std::to_string(minVal) + ", " + std::to_string(
+      maxVal) + "]";
+    rcl_interfaces::msg::FloatingPointRange range;
+    range.from_value = minVal;
+    range.to_value = maxVal;
+    descriptor.floating_point_range.push_back(range);
+  } else if constexpr (std::is_same<T, int>::value) {
+    descriptor.additional_constraints = "Range: [" + std::to_string(minVal) + ", " + std::to_string(
+      maxVal) + "]";
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = minVal;
+    range.to_value = maxVal;
+    descriptor.integer_range.push_back(range);
+  }
+
+
+  declare_parameter(paramName, rclcpp::ParameterValue(defValue), descriptor);
+
+  if (!get_parameter(paramName, outVal)) {
+    RCLCPP_WARN_STREAM(
+      get_logger(),
+      "The parameter '"
+        << paramName
+        << "' is not available or is not valid, using the default value: "
+        << defValue);
+  }
+
+  if (!log_info.empty()) {
+    if constexpr (std::is_same<T, bool>::value) {
+      RCLCPP_INFO_STREAM(get_logger(), log_info << (outVal ? "TRUE" : "FALSE"));
+    } else {
+      RCLCPP_INFO_STREAM(get_logger(), log_info << outVal);
+    }
+  }
+}
+// <---- Template Function definitions
 
 }  // namespace ldlidar
 
