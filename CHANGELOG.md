@@ -1,8 +1,16 @@
 CHANGELOG
 =========
 
+2024-11-25
+----------
+
+* Remove LDLidar executable node
+* Rename `ldlidar.launch.py` to `ldlidar_bringup.launch.py`
+* `ldlidar_bringup.launch.py` starts the node as a component in a `component_container_isolated` (`component_container` in Foxy for compatibility)
+
 2024-02-08
 ----------
+
 * Add `lidar.bins` parameter to set a fixed scan bin size for improved compatibility with the SLAM Toolbox package
 * Add parameter `comm.timeout_msec` 
 * Change `lidar.rot_verse` parameter from integer to string
@@ -14,14 +22,17 @@ CHANGELOG
 
 2024-02-03
 ----------
+
 * Add support for QoS override parameters -> https://design.ros2.org/articles/qos_configurability.html#adding-a-new-mechanism-vs-using-parameters
 
 2022-11-27
 ----------
+
 * Add direct serial port connection feature
 
 v0.2.0 - Humble
 ---------------
+
 * Change license from MIT to Apache-2.0
 * Code refactoring to meet [ROS2 rules](https://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Code-Style-Language-Versions.html)
 * Add CONTRIBUTING.md
@@ -34,6 +45,7 @@ v0.2.0 - Humble
 
 v0.1.0
 ------
+
 * ROS2 Foxy and Ubuntu 20.04
 * First working version of the node based on ROS2 lifecycle architecture
 * Python launch scripts
