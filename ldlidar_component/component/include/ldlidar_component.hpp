@@ -193,7 +193,7 @@ private:
   int _baudrate = 230400; ///< Serial baudrate.
   int _readTimeOut_msec = 1000; ///< Serial read timeout in milliseconds.
   bool _counterclockwise = true; ///< Rotation direction.
-  bool _enableAngleCrop = true; ///< Enable angle cropping.
+  bool _enableAngleCrop = false; ///< Enable angle cropping.
   double _angleCropMin = 90.0; ///< Angle cropping minimum value.
   double _angleCropMax = 270.0; ///< Angle cropping maximum value.
   int _bins = 455; ///< Fixed number of bins.
