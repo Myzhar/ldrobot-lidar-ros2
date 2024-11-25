@@ -186,6 +186,7 @@ protected:
   void publishLaserScan(ldlidar::Points2D & src, double lidar_spin_freq);
 
 private:
+  // ----> Parameters
   bool _debugMode = true; ///< Debug mode flag.
   std::string _lidarModel; ///< Lidar model.
   std::string _serialPort; ///< Serial port name.
@@ -199,24 +200,36 @@ private:
   double _rangeMin = 0.03; ///< Minimum range.
   double _rangeMax = 15.0; ///< Maximum range.
   std::string _frameId = "ldlidar_link"; ///< Frame ID.
-
   float _distScale = 0.001; ///< Scale factor for distance.
+  // <---- Parameters
 
+  // ----> Publishers
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::LaserScan>> _scanPub; ///< Laser scan publisher.
+  // <---- Publishers
 
+  // ----> Topics
   std::string _topicRoot = "~/"; ///< Topic root.
   std::string _scanTopic = "scan"; ///< Scan topic.
+  // <---- Topics
 
+  // ----> Diagnostic
   diagnostic_updater::Updater _diagUpdater; ///< Diagnostic updater.
+  // <---- Diagnostic
 
+  // ----> Lidar
   std::unique_ptr<ldlidar::LDLidarDriver> _lidar; ///< Lidar driver.
   ldlidar::LDType _lidarType; ///< Lidar type.
+  // <---- Lidar
 
+  // ----> Threads
   std::thread _lidarThread; ///< Lidar thread.
   bool _threadStop = false; ///< Thread stop flag.
+  // <---- Threads
 
+  // ----> Diagnostic
   double _pubFreq; ///< Publishing frequency.
   bool _publishing; ///< Publishing flag.
+  // <---- Diagnostic
 };
 
 // ----> Template Function definitions
