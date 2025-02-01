@@ -375,7 +375,8 @@ void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_sp
       if (index < beam_size) {
         if (index < 0) {
           RCLCPP_ERROR(
-            get_logger(), "error index: %d, beam_size: %d, angle: %f, msg->angle_min: %f, msg->angle_increment: %f",
+            get_logger(),
+              "error index: %d, beam_size: %d, angle: %f, msg->angle_min: %f, msg->angle_increment: %f",
             index, beam_size, angle, angle_min, angle_increment);
         }
 

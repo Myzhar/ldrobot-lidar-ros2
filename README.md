@@ -32,7 +32,10 @@ LD19 Lifecycle            |  LD19 outdoor
 
 ## Install the node
 
-The node is designed to work in [ROS2 Humble](https://docs.ros.org/en/humble/index.html).
+The node is designed to work with
+
+* [ROS 2 Humble](https://docs.ros.org/en/humble/index.html)
+* [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/index.html)
 
 Clone the repository in your ROS2 workspace:
 
