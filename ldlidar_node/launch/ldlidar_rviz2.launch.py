@@ -1,4 +1,4 @@
-# Copyright 2022 Walter Lucetti
+# Copyright 2024 Walter Lucetti
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ def generate_launch_description():
         'ldlidar.rviz'
     )
 
-    # RVIZ2node
+    # RVIZ2 node
     rviz2_node = Node(
         package='rviz2',
         executable='rviz2',

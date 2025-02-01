@@ -1,4 +1,4 @@
-# Copyright 2022 Walter Lucetti
+# Copyright 2024 Walter Lucetti
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ def generate_launch_description():
     )
 
     # SLAM Toolbox node in async mode
-    slam_toolbox_node = LifecycleNode(          
+    slam_toolbox_node = LifecycleNode(
           package='slam_toolbox',
           executable='async_slam_toolbox_node',
           namespace='',
@@ -73,7 +73,7 @@ def generate_launch_description():
     ldlidar_launch = IncludeLaunchDescription(
         launch_description_source=PythonLaunchDescriptionSource([
             get_package_share_directory('ldlidar_node'),
-            '/launch/ldlidar.launch.py'
+            '/launch/ldlidar_bringup.launch.py'
         ]),
         launch_arguments={
             'node_name': 'ldlidar_node'
@@ -112,7 +112,7 @@ def generate_launch_description():
     ld.add_action(lc_mgr_node)
 
     # Launch SLAM Toolbox node
-    ld.add_action(slam_toolbox_node)    
+    ld.add_action(slam_toolbox_node)
 
     # Launch fake odom publisher node
     ld.add_action(fake_odom)

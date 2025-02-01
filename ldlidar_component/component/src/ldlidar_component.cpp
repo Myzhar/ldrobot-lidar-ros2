@@ -1,4 +1,4 @@
-//  Copyright 2022 Walter Lucetti
+//  Copyright 2024 Walter Lucetti
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -164,10 +164,10 @@ void LdLidarComponent::getLidarParams()
     " * Bins: ");
   getParam(
     "lidar.range_min", _rangeMin, _rangeMin, "Minimum distance in units", false,
-    " * Minimum distance: ");
+    " * Min. distance: ");
   getParam(
     "lidar.range_max", _rangeMax, _rangeMax, "Maximum distance in units", false,
-    " * Minimum distance: ");
+    " * Max. distance: ");
   getParam(
     "lidar.enable_angle_crop", _enableAngleCrop, _enableAngleCrop, "Angle cropping", false,
     " * Angle cropping: ");
@@ -178,83 +178,6 @@ void LdLidarComponent::getLidarParams()
     "lidar.angle_crop_max", _angleCropMax, _angleCropMax, "Angle cropping maximum angle",
     false, " * Angle cropping max angle: ");
   // <---- Lidar config
-}
-
-template<typename T>
-void LdLidarComponent::getParam(
-  std::string paramName, T defValue, T & outVal,
-  const std::string & description, bool read_only, std::string log_info)
-{
-  try {
-    add_parameter(paramName, rclcpp::ParameterValue(defValue), description, "", read_only);
-  } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
-    RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
-  }
-
-  if (!get_parameter(paramName, outVal)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(), "The parameter '"
-        << paramName << "' is not available or is not valid, using the default value: "
-        << defValue);
-  }
-
-  if (!log_info.empty()) {
-    RCLCPP_INFO_STREAM(get_logger(), log_info << outVal);
-  }
-}
-
-void LdLidarComponent::getParam(
-  std::string paramName, int defValue, int & outVal,
-  const nav2_util::LifecycleNode::integer_range & range,
-  const std::string & description,
-  bool read_only,
-  std::string log_info)
-{
-  try {
-    add_parameter(
-      paramName, rclcpp::ParameterValue(defValue), range,
-      description, "", read_only);
-  } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
-    RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
-  }
-
-  if (!get_parameter(paramName, outVal)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(), "The parameter '"
-        << paramName << "' is not available or is not valid, using the default value: "
-        << defValue);
-  }
-
-  if (!log_info.empty()) {
-    RCLCPP_INFO_STREAM(get_logger(), log_info << outVal);
-  }
-}
-
-void LdLidarComponent::getParam(
-  std::string paramName, float defValue, float & outVal,
-  const nav2_util::LifecycleNode::floating_point_range & range,
-  const std::string & description,
-  bool read_only,
-  std::string log_info)
-{
-  try {
-    add_parameter(
-      paramName, rclcpp::ParameterValue(defValue), range,
-      description, "", read_only);
-  } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & ex) {
-    RCLCPP_DEBUG_STREAM(get_logger(), "Exception: " << ex.what());
-  }
-
-  if (!get_parameter(paramName, outVal)) {
-    RCLCPP_WARN_STREAM(
-      get_logger(), "The parameter '"
-        << paramName << "' is not available or is not valid, using the default value: "
-        << defValue);
-  }
-
-  if (!log_info.empty()) {
-    RCLCPP_INFO_STREAM(get_logger(), log_info << outVal);
-  }
 }
 
 nav2_util::CallbackReturn LdLidarComponent::on_configure(const lc::State & prev_state)
@@ -452,7 +375,8 @@ void LdLidarComponent::publishLaserScan(ldlidar::Points2D & src, double lidar_sp
       if (index < beam_size) {
         if (index < 0) {
           RCLCPP_ERROR(
-            get_logger(), "error index: %d, beam_size: %d, angle: %f, msg->angle_min: %f, msg->angle_increment: %f",
+            get_logger(),
+              "error index: %d, beam_size: %d, angle: %f, msg->angle_min: %f, msg->angle_increment: %f",
             index, beam_size, angle, angle_min, angle_increment);
         }
 

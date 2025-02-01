@@ -1,22 +1,10 @@
-<h1 align="center">
-  ldrobot-lidar-ros2
-</h1>
+# LD Lidar ROS 2 Package
 
-<h4 align="center">ROS 2 package for LDRobot lidar. Based on Nav2 Lifecycle nodes</h4>
+## ROS 2 package for LDRobot lidar - Based on Nav2 Lifecycle nodes
 
-<p align="center">
-  <a href="#get-the-lidar">Get the lidar</a> •
-  <a href="#the-node-in-action">YouTube videos</a> •
-  <a href="#install-the-node">Install</a> •
-  <a href="#start-the-node">Start the Node</a> •
-  <a href="#parameters">Parameters</a> •
-  <a href="#display-scan-on-rviz2">RViz2</a> •  
-  <a href="#integrate-the-node-in-your-robot">Robot integration</a> • 
-  <a href="#benchmarking">Benchmarking</a>
-</p>
-<br>
+[Get the Lidar](#get-the-lidar) • [YouTube Videos](#the-node-in-action) • [Install](#install-the-node) • [Start the Node](#start-the-node) • [Parameters](#parameters) • [RViz2](#display-scan-on-rviz2) • [Robot Integration](#integrate-the-node-in-your-robot) • [Benchmarking](#benchmarking)
 
-This node is designed to work with the DToF 2D Lidar sensors [LD19](https://www.ldrobot.com/product/en/112) made by [LDRobot](https://www.ldrobot.com/en).
+This package is designed to work with the DToF 2D Lidar sensors [LD19](https://www.ldrobot.com/product/en/112) made by [LDRobot](https://www.ldrobot.com/en).
 
 It can work also with the [LD06](https://www.ldrobot.com/product/en/98) model, but no tests have been performed with it. LD06 cannot work outdoor.
 
@@ -33,7 +21,7 @@ LDRobot then created also an [Indiegogo campaign](https://www.indiegogo.com/proj
 LDRobot today distributes the Lidar through third-party resellers:
 
 * Waveshare: [LD19](https://www.waveshare.com/wiki/DTOF_LIDAR_LD19)
-* Innomaker: [LD19](https://www.inno-maker.com/product/lidar-ld06/)
+* Innomaker: [LD06](https://www.inno-maker.com/product/lidar-ld06/)
 * Other: [Search on Google](https://www.google.com/search?q=ld19+lidar&newwindow=1&sxsrf=ALiCzsb2xd4qTTA78N00mP9-PP5HY4axZw:1669710673586&source=lnms&tbm=shop&sa=X&ved=2ahUKEwjYns78_NL7AhVLVfEDHf2PDk8Q_AUoA3oECAIQBQ&cshid=1669710734415350&biw=1862&bih=882&dpr=1)
 
 ## The node in action
@@ -44,7 +32,10 @@ LD19 Lifecycle            |  LD19 outdoor
 
 ## Install the node
 
-The node is designed to work in [ROS2 Humble](https://docs.ros.org/en/humble/index.html).
+The node is designed to work with
+
+* [ROS 2 Humble](https://docs.ros.org/en/humble/index.html)
+* [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/index.html)
 
 Clone the repository in your ROS2 workspace:
 
@@ -73,20 +64,31 @@ Update the environment variables:
 
 ## Start the node
 
-### Default parameters
+### Launch file with YAML parameters
 
-Open a terminal console and enter the following command:
+The default values of the [parameters of the node](#parameters) can be modified by editing the file [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml).
 
-    ros2 run ldlidar_node ldlidar_node # <--- not recommended. Better using the launch file 
+Open a terminal console and enter the following command to start the node with customized parameters:
 
-the `ldlidar` node is based on the [`ROS2 lifecycle` architecture](https://design.ros2.org/articles/node_lifecycle.html), hence it starts in the `UNCONFIGURED` state.
-To configure the node, setting all the parameters to the default value, trying to estabilish a connection, and activating the scan publisher, the lifecycle services must be called.
+    ros2 launch ldlidar_node ldlidar_bringup.launch.py
 
-Open a new terminal console and enter the following command: 
+The [`ldlidar_bringup.launch.py`](ldlidar_node/launch/ldlidar_bringup.launch.py) starts a ROS 2 Container, which loads the LDLidar Component as a plugin.
+
+The [`ldlidar_bringup.launch.py`](ldlidar_node/launch/ldlidar_bringup.launch.py) script also starts a `robot_state_publisher` node that provides the static TF transform of the 
+LDLidar [`ldlidar_base`->`ldlidar_link`], and provides the ldlidar description in the `/robot_description`.
+
+![TF](./images/ldlidar_tf.png)
+
+### Lifecycle
+
+The `ldlidar` node is based on the [`ROS2 lifecycle` architecture](https://design.ros2.org/articles/node_lifecycle.html), hence it starts in the `UNCONFIGURED` state.
+To configure the node, load all the parameters, establish a connection, and activate the scan publisher, the lifecycle services must be called in sequence.
+
+Open a new terminal console and enter the following command:
 
     ros2 lifecycle set /lidar_node configure
 
-`Transitioning successful` is returned if the node is correctly configured and the connection is estabilished, `Transitioning failed` in case of errors. Look at the node log for information about eventual connection problems.
+If the node is correctly configured and the connection is established, `Transitioning successful` is returned. If there are errors, `Transitioning failed` is returned. Check the node log for details on any connection issues.
 
 The node is now in the `INACTIVE` state, enter the following command to activate:
 
@@ -94,27 +96,16 @@ The node is now in the `INACTIVE` state, enter the following command to activate
     
 The node is now activated and the `/ldlidar_node/scan` topic of type `sensor_msgs/msg/LaserScan` is available to be subscribed.
 
-### Launch file with YAML parameters
+#### Launch file with YAML parameters and Lifecycle manager
 
-The default values of the [parameters of the node](#parameters) can be modified by editing the file [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml).
-
-Open a terminal console and enter the following command to start the node with customized parameters:
-
-    ros2 launch ldlidar_node ldlidar.launch.py
-    
-The [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml) script also starts a `robot_state_publisher` node that provides the static TF transform of the LDLidar [`ldlidar_base`->`ldlidar_link`], and provides the ldlidar description in the `/robot_description`.
-
-![](./images/ldlidar_tf.png)
-
-### Launch file with YAML parameters and Lifecycle manager
-
-Thanks to the [NAV2](https://navigation.ros.org/index.html) project it is possible to launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) node that is taking care of processing the state transitions described above.
-
-An example launch file is provided, [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py), that illustrates how to start a `ldlidar_node` that loads the parameters from the `ldlidar.yaml` file, and starts the `lifecycle_manager` correctly configured with the file [`lifecycle_mgr.yaml`](ldlidar_node/params/lifecycle_mgr.yaml) to manage the lifecycle processing:
+Thanks to the [NAV2](https://navigation.ros.org/index.html) project, you can launch a [`lifecycle_manager`](https://navigation.ros.org/configuration/packages/configuring-lifecycle.html) node that handles the state transitions described above.
+An example launch file, [`ldlidar_with_mgr.launch.py`](ldlidar_node/launch/ldlidar_with_mgr.launch.py), demonstrates how to start the `ldlidar_node` with parameters loaded from the 
+`ldlidar.yaml` file. It also starts the `lifecycle_manager`, configured with the [`lifecycle_mgr.yaml`](ldlidar_node/config/lifecycle_mgr.yaml) file, to automatically manage the 
+lifecycle transitions:
 
     ros2 launch ldlidar_node ldlidar_with_mgr.launch.py
 
-The `ldlidar_with_mgr.launch.py` script automatically starts the `ldlidar_node` by including the `ldlidar.launch.py` launch file.
+The `ldlidar_with_mgr.launch.py` script automatically starts the `ldlidar_node` by including the `ldlidar_bringup.launch.py` launch file.
 
 ## Parameters
 
@@ -135,31 +126,37 @@ Following the list of node parameters:
 * **`lidar.angle_crop_min`**: minimum cropping angle
 * **`lidar.angle_crop_max`**: maximum cropping angle
 
-## Display scan on RVIZ2
+## Display scan on RViz2
 
-The launch file `ldlidar_rviz2.launch.py` starts the `ldlidar_node` node, the `lifecycle_manager` node, and a precofigured instance of RViz2 to display the 2D laser scan provided by the LDRobot sensors. This is an example to demonstrate how to correctly setup RViz2 to be used with the `ldlidar_node` node.
+The launch file `ldlidar_rviz2.launch.py` starts the `ldlidar_node` node, the `lifecycle_manager` node, and a preconfigured instance of RViz2 to display the 2D laser scan provided by the LDRobot sensors. This is an example to demonstrate how to correctly setup RViz2 to be used with the `ldlidar_node` node.
 
 Open a terminal console and enter the following command:
 
     ros2 launch ldlidar_node ldlidar_rviz2.launch.py
 
-![](./images/ldlidar_rviz2.png)
+![Rviz2](./images/ldlidar_rviz2.png)
 
-## Integrate the node in your robot
+## Integrate the LDLidar sensor in your robot
 
-Follow the following procedure, to integrate the `ldlidar_node` in a robot configuration:
+Follow these steps to integrate the LDLidar sensor into your robot configuration:
 
-* Provide a TF transform from `base_link` to `ldlidar_base`, that is placed in the center of the base of the lidar scanner. The `ldlidar_base` -> `ldlidar_link` transform is provided by the `robot_state_publisher` started by the `ldlidar.launch.py` launch file.
-* Modify the [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml) to match the configuration of the robot.
-* Include the [`ldlidar.launch.py`](ldlidar_node/launch/ldlidar.launch.py) in the bringup launch file of the robot. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
-* Handle lifecycle to correctly start the node. You can use the Nav2 `lifecycle_manager`, by including it in the bringup launch file. Follow the [provided example](#launch-file-with-yaml-parameters-and-lifecycle-manager).
-* Enjoy your working system
+1. **Provide TF Transform**: Ensure there is a TF transform from `base_link` to `ldlidar_base`, positioned at the center of the lidar scanner base. The `ldlidar_base` -> `ldlidar_link` transform is provided by the `robot_state_publisher` started by the `ldlidar_bringup.launch.py` launch file.
+
+2. **Modify Configuration**: Update the [`ldlidar.yaml`](ldlidar_node/config/ldlidar.yaml) file to match your robot's configuration.
+
+3. **Include Launch File**: Add the [`ldlidar_bringup.launch.py`](ldlidar_node/launch/ldlidar_bringup.launch.py) to your robot's bringup launch file. Refer to the [example provided](#launch-file-with-yaml-parameters-and-lifecycle-manager).
+
+4. **Handle Lifecycle**: Properly manage the node's lifecycle. You can use the Nav2 `lifecycle_manager` by including it in your bringup launch file. Follow the [example provided](#launch-file-with-yaml-parameters-and-lifecycle-manager).
+
+5. **Deploy and Test**: Deploy your configuration and test the system to ensure everything is working correctly.
+
+Enjoy your fully integrated lidar system!
 
 ## SLAM Toolbox example
 
 The launch file `ldlidar_slam.launch.py` shows how to use the node with the [SLAM Toolbox](https://github.com/SteveMacenski/slam_toolbox) package to generate a 2D map for robot navigation.
 
-![](./images/ld19_slam.png)
+![Slam](./images/ld19_slam.png)
 
 ## Benchmarking
 
@@ -169,52 +166,45 @@ First of all install the [ros2_benchmark package](https://github.com/NVIDIA-ISAA
 
 Launch the benchmark:
 
-    cd ~/ros2_ws/src/ldrobot-lidar-ros2/test/
+    cd ~/ros2_ws/src/ldrobot-lidar-ros2/ldlidar_node/test/
     launch_test ldlidar_benchmark.py
 
-the final result should be similar to 
+the final result should be similar to
 
-```
-+--------------------------------------------------------------------------------------------+
-|                                  LD Lidar Live Benchmark                                   |
-|                                        Final Report                                        |
-+--------------------------------------------------------------------------------------------+
-| [Scan] Delta between First & Last Received Frames (ms) : 4910.833                          |
-| [Scan] Mean Playback Frame Rate (fps) : 10.182                                             |
-| [Scan] Mean Frame Rate (fps) : 10.182                                                      |
-| [Scan] # of Missed Frames : 0.000                                                          |
-| [Scan] # of Frames Sent : 50.000                                                           |
-| [Scan] First Sent to First Received Latency (ms) : 0.156                                   |
-| [Scan] Last Sent to Last Received Latency (ms) : 0.235                                     |
-| [Scan] First Frame End-to-end Latency (ms) : 0.156                                         |
-| [Scan] Last Frame End-to-end Latency (ms) : 0.235                                          |
-| [Scan] Max. End-to-End Latency (ms) : 0.265                                                |
-| [Scan] Min. End-to-End Latency (ms) : 0.093                                                |
-| [Scan] Mean End-to-End Latency (ms) : 0.189                                                |
-| [Scan] Max. Frame-to-Frame Jitter (ms) : 0.594                                             |
-| [Scan] Min. Frame-to-Frame Jitter (ms) : 0.000                                             |
-| [Scan] Mean Frame-to-Frame Jitter (ms) : 0.218                                             |
-| [Scan] Frame-to-Frame Jitter Std. Deviation (ms) : 0.145                                   |
-+--------------------------------------------------------------------------------------------+
-| Baseline Overall CPU Utilization (%) : 8.333                                               |
-| Max. Overall CPU Utilization (%) : 66.667                                                  |
-| Min. Overall CPU Utilization (%) : 0.000                                                   |
-| Mean Overall CPU Utilization (%) : 0.856                                                   |
-| Std Dev Overall CPU Utilization (%) : 3.420                                                |
-+--------------------------------------------------------------------------------------------+
-| [metadata] Test Name : LD Lidar Live Benchmark                                             |
-| [metadata] Test File Path : /home/walter/devel/ros2/ros2_walt/src/ldrobot-lidar-ros2/ldlidar_node/test/ldlidar_benchmark.py |
-| [metadata] Test Datetime : 2024-06-25T20:05:40Z                                            |
-| [metadata] Device Hostname : walter-Legion-5-15ACH6H                                       |
-| [metadata] Device Architecture : x86_64                                                    |
-| [metadata] Device OS : Linux 6.5.0-25-generic #25~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Feb 20 16:09:15 UTC 2 |
-| [metadata] Idle System CPU Util. (%) : 0.500                                               |
-| [metadata] Benchmark Mode : 3                                                              |
-+--------------------------------------------------------------------------------------------+
-```
-
-
-
-
-
+    +--------------------------------------------------------------------------------------------+
+    |                                  LD Lidar Live Benchmark                                   |
+    |                                        Final Report                                        |
+    +--------------------------------------------------------------------------------------------+
+    | [Scan] Delta between First & Last Received Frames (ms) : 4900.138                          |
+    | [Scan] Mean Playback Frame Rate (fps) : 9.936                                              |
+    | [Scan] Mean Frame Rate (fps) : 9.936                                                       |
+    | [Scan] # of Missed Frames : 0.000                                                          |
+    | [Scan] # of Frames Sent : 49.000                                                           |
+    | [Scan] First Sent to First Received Latency (ms) : 0.075                                   |
+    | [Scan] Last Sent to Last Received Latency (ms) : 0.113                                     |
+    | [Scan] First Frame End-to-end Latency (ms) : 0.075                                         |
+    | [Scan] Last Frame End-to-end Latency (ms) : 0.113                                          |
+    | [Scan] Max. End-to-End Latency (ms) : 0.172                                                |
+    | [Scan] Min. End-to-End Latency (ms) : 0.049                                                |
+    | [Scan] Mean End-to-End Latency (ms) : 0.098                                                |
+    | [Scan] Max. Frame-to-Frame Jitter (ms) : 100.142                                           |
+    | [Scan] Min. Frame-to-Frame Jitter (ms) : 0.000                                             |
+    | [Scan] Mean Frame-to-Frame Jitter (ms) : 17.865                                            |
+    | [Scan] Frame-to-Frame Jitter Std. Deviation (ms) : 12.793                                  |
+    +--------------------------------------------------------------------------------------------+
+    | Baseline Overall CPU Utilization (%) : 0.000                                               |
+    | Max. Overall CPU Utilization (%) : 79.167                                                  |
+    | Min. Overall CPU Utilization (%) : 0.000                                                   |
+    | Mean Overall CPU Utilization (%) : 1.179                                                   |
+    | Std Dev Overall CPU Utilization (%) : 3.964                                                |
+    +--------------------------------------------------------------------------------------------+
+    | [metadata] Test Name : LD Lidar Live Benchmark                                             |
+    | [metadata] Test File Path : /home/walter/devel/ros2/ros2_walt/src/ldrobot-lidar-ros2/ldlidar_node/test/ldlidar_benchmark.py |
+    | [metadata] Test Datetime : 2024-11-25T22:12:54Z                                            |
+    | [metadata] Device Hostname : walter-Legion-5-15ACH6H                                       |
+    | [metadata] Device Architecture : x86_64                                                    |
+    | [metadata] Device OS : Linux 6.8.0-40-generic #40~22.04.3-Ubuntu SMP PREEMPT_DYNAMIC Tue Jul 30 17:30:19 UTC 2 |
+    | [metadata] Idle System CPU Util. (%) : 0.333                                               |
+    | [metadata] Benchmark Mode : 3                                                              |
+    +--------------------------------------------------------------------------------------------+
 
