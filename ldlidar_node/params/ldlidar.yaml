@@ -8,7 +8,7 @@
       debug_mode: false # true to activate debug messages
 
     comm:
-      serial_port: '/dev/ldlidar' # serial port name
+      serial_port: '/dev/ttyAMA0' # serial port name
       baudrate: 230400 # serial baudrate for LDLiDAR_LD19: 230400. Serial baudrate for LDLiDAR_STL27L: 921600
       timeout_msec: 1000 # data communication timeout in msec
 
