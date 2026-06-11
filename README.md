@@ -2,7 +2,7 @@
 
 ## ROS 2 package for LDRobot lidar - Based on Nav2 Lifecycle nodes
 
-[Get the Lidar](#get-the-lidar) • [YouTube Videos](#the-node-in-action) • [Install](#install-the-node) • [Start the Node](#start-the-node) • [Parameters](#parameters) • [RViz2](#display-scan-on-rviz2) • [Robot Integration](#integrate-the-node-in-your-robot) • [Benchmarking](#benchmarking)
+[Get the Lidar](#get-the-lidar) • [YouTube Videos](#the-node-in-action) • [Install](#install-the-node) • [Start the Node](#start-the-node) • [Parameters](#parameters) • [RViz2](#display-scan-on-rviz2) • [Robot Integration](#integrate-the-node-in-your-robot) • [SLAM](#slam-toolbox-example) • [Benchmarking](#benchmarking)
 
 This package is designed to work with the DToF 2D Lidar sensors [LD19](https://www.ldrobot.com/product/en/112) made by [LDRobot](https://www.ldrobot.com/en).
 
@@ -165,9 +165,27 @@ Enjoy your fully integrated lidar system!
 
 ## SLAM Toolbox example
 
-The launch file `ldlidar_slam.launch.py` shows how to use the node with the [SLAM Toolbox](https://github.com/SteveMacenski/slam_toolbox) package to generate a 2D map for robot navigation.
+The launch file [`ldlidar_slam.launch.py`](ldlidar_node/launch/ldlidar_slam.launch.py) shows how to use the node with the [SLAM Toolbox](https://github.com/SteveMacenski/slam_toolbox) package to generate a 2D map for robot navigation:
+
+    ros2 launch ldlidar_node ldlidar_slam.launch.py
+
+The required `odom` -> `ldlidar_base` transform is provided by a fake static TF publisher, so the map is correct only as long as the lidar does not move. This is useful for a quick demo with the sensor on a desk.
 
 ![Slam](./images/ld19_slam.png)
+
+### SLAM Toolbox with laser odometry (YALIO)
+
+The launch file [`ldlidar_yalio_slam.launch.py`](ldlidar_node/launch/ldlidar_yalio_slam.launch.py) replaces the fake static TF with real laser odometry provided by **YALIO** (Yet Another Lidar ICP Odometry), a PL-ICP scan matcher. The lidar can now move while mapping:
+
+    ros2 launch ldlidar_node ldlidar_yalio_slam.launch.py
+
+The YALIO component is loaded in the same container as the lidar component and SLAM Toolbox, and its lifecycle is handled by the same `lifecycle_manager` (activation order: `ldlidar_node` -> `yalio` -> `slam_toolbox`). It subscribes to `/ldlidar_node/scan` and provides:
+
+- the `odom` -> `ldlidar_base` TF computed by scan matching;
+- the `/odom_icp` topic (`nav_msgs/Odometry`) with the estimated pose and its covariance;
+- the `/yalio/reset_odometry` service (`std_srvs/Trigger`) and the `/yalio/set_pose` topic (`geometry_msgs/PoseWithCovarianceStamped`) to reset or re-initialize the odometry.
+
+> :pushpin: **Note**: the `yalio`, `yalio_component`, and `yalio_lib` packages must be built in the same workspace. They are not available through `rosdep`.
 
 ## Benchmarking
 
