@@ -199,7 +199,7 @@ rclcpp_components_register_nodes(${PROJECT_NAME} "ldlidar::LdLidarComponent")
 set(node_plugins "${node_plugins}ldlidar::LdLidarComponent;$<TARGET_FILE:${PROJECT_NAME}>\n")
 
 # Install components
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ldlidar ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
